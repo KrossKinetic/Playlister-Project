@@ -27,8 +27,8 @@ class DatabaseManager {
         return await MongoDatabaseManagerAuth.findOneUser(filter)
     }
 
-    static createUser = async (firstName, lastName, email, passwordHash, avatarPng) => {
-        return await MongoDatabaseManagerAuth.createSavedUser(firstName, lastName, email, passwordHash, avatarPng)
+    static createUser = async (username, email, passwordHash, avatarPng) => {
+        return await MongoDatabaseManagerAuth.createSavedUser(username, email, passwordHash, avatarPng)
     }
 
     static createPlaylist = async (req, body) => {

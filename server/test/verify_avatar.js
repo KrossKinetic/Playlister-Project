@@ -1,8 +1,7 @@
 const axios = require('axios');
 
 const testUser = {
-    firstName: "Test",
-    lastName: "User",
+    username: "TestUser",
     email: "testuser" + Date.now() + "@example.com",
     password: "password123",
     passwordVerify: "password123",
@@ -22,6 +21,15 @@ async function verifyAvatar() {
                 console.error("Avatar verification FAILED: Avatar does not match.");
                 console.log("Expected:", testUser.avatarPng);
                 console.log("Received:", response.data.user.avatarPng);
+                process.exit(1);
+            }
+
+            if (response.data.user.username === testUser.username) {
+                console.log("Username verification PASSED: Username matches sent data.");
+            } else {
+                console.error("Username verification FAILED: Username does not match.");
+                console.log("Expected:", testUser.username);
+                console.log("Received:", response.data.user.username);
                 process.exit(1);
             }
         } else {

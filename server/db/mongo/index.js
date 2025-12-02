@@ -8,8 +8,8 @@ class MongoDatabaseManagerAuth {
         return User.findOne(filter)
     }
 
-    static createSavedUser = async (firstName, lastName, email, passwordHash, avatarPng) => {
-        let new_user = new User({ firstName, lastName, email, passwordHash, avatarPng });
+    static createSavedUser = async (username, email, passwordHash, avatarPng) => {
+        let new_user = new User({ username, email, passwordHash, avatarPng });
         return new_user.save()
     }
 }

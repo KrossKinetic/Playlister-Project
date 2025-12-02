@@ -29,7 +29,7 @@ export default function LoginScreen() {
 
     let modalJSX = "";
     console.log(auth);
-    if (auth.errorMessage !== null){
+    if (auth.errorMessage !== null) {
         modalJSX = <MUIErrorModal />;
     }
     console.log(modalJSX);
@@ -43,7 +43,6 @@ export default function LoginScreen() {
                 sm={4}
                 md={7}
                 sx={{
-                    backgroundImage: 'url(https://static.displate.com/857x1200/displate/2021-09-09/acaf2be9f58d1c05de9e4e47c580ee00_0da6a981d11a923cf24cf3f465fa81cc.jpg)',
                     backgroundRepeat: 'no-repeat',
                     backgroundColor: (t) =>
                         t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
@@ -62,7 +61,7 @@ export default function LoginScreen() {
                     }}
                 >
                     <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-                        <LockOutlinedIcon/>
+                        <LockOutlinedIcon />
                     </Avatar>
                     <Typography component="h1" variant="h5">
                         Sign in
@@ -107,7 +106,7 @@ export default function LoginScreen() {
                     </Box>
                 </Box>
             </Grid>
-            { modalJSX }
+            {modalJSX}
         </Grid>
     );
 }

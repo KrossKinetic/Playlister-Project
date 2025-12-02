@@ -20,8 +20,7 @@ getLoggedIn = async (req, res) => {
         return res.status(200).json({
             loggedIn: true,
             user: {
-                firstName: loggedInUser.firstName,
-                lastName: loggedInUser.lastName,
+                username: loggedInUser.username,
                 email: loggedInUser.email,
                 avatarPng: loggedInUser.avatarPng
             }
@@ -76,8 +75,7 @@ loginUser = async (req, res) => {
         }).status(200).json({
             success: true,
             user: {
-                firstName: existingUser.firstName,
-                lastName: existingUser.lastName,
+                username: existingUser.username,
                 email: existingUser.email,
                 avatarPng: existingUser.avatarPng
             }
@@ -101,9 +99,9 @@ logoutUser = async (req, res) => {
 registerUser = async (req, res) => {
     console.log("REGISTERING USER IN BACKEND");
     try {
-        const { firstName, lastName, email, password, passwordVerify, avatarPng } = req.body;
-        console.log("create user: " + firstName + " " + lastName + " " + email + " " + password + " " + passwordVerify);
-        if (!firstName || !lastName || !email || !password || !passwordVerify) {
+        const { username, email, password, passwordVerify, avatarPng } = req.body;
+        console.log("create user: " + username + " " + email + " " + password + " " + passwordVerify);
+        if (!username || !email || !password || !passwordVerify) {
             return res
                 .status(400)
                 .json({ errorMessage: "Please enter all required fields." });
@@ -143,7 +141,7 @@ registerUser = async (req, res) => {
         const passwordHash = await bcrypt.hash(password, salt);
         console.log("passwordHash: " + passwordHash);
 
-        const savedUser = await DatabaseManager.createUser(firstName, lastName, email, passwordHash, avatarPng);
+        const savedUser = await DatabaseManager.createUser(username, email, passwordHash, avatarPng);
 
         console.log("new user saved: " + savedUser._id);
 
@@ -158,8 +156,7 @@ registerUser = async (req, res) => {
         }).status(200).json({
             success: true,
             user: {
-                firstName: savedUser.firstName,
-                lastName: savedUser.lastName,
+                username: savedUser.username,
                 email: savedUser.email,
                 avatarPng: savedUser.avatarPng
             }
