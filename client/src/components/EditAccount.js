@@ -1,4 +1,4 @@
-import { useContext, useState, useRef } from 'react'; // Import useState and useRef
+import { useContext, useState, useRef } from 'react';
 import AuthContext from '../auth'
 import MUIErrorModal from './MUIErrorModal'
 import Copyright from './Copyright'
@@ -7,17 +7,15 @@ import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
-import CssBaseline from '@mui/material/CssBaseline';
 import Grid from '@mui/material/Grid';
-import Link from '@mui/material/Link';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
-export default function RegisterScreen() {
+export default function EditAccount() {
     const { auth } = useContext(AuthContext);
 
-    const [image, setImage] = useState(null);
+    const [image, setImage] = useState(auth.user ? auth.user.avatarPng : null);
     const fileInputRef = useRef(null);
 
     const handleFileChange = (event) => {
@@ -39,11 +37,9 @@ export default function RegisterScreen() {
     const handleSubmit = (event) => {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
-
-        auth.registerUser(
+        auth.updateUser(
             formData.get('username'),
             image,
-            formData.get('email'),
             formData.get('password'),
             formData.get('passwordVerify')
         );
@@ -56,7 +52,6 @@ export default function RegisterScreen() {
 
     return (
         <Container component="main" maxWidth="xs">
-
             <Box
                 sx={{
                     marginTop: 8,
@@ -65,8 +60,6 @@ export default function RegisterScreen() {
                     alignItems: 'center',
                 }}
             >
-
-
                 <input
                     type="file"
                     ref={fileInputRef}
@@ -77,7 +70,7 @@ export default function RegisterScreen() {
                 />
 
                 <Typography component="h1" variant="h5">
-                    Sign up
+                    Edit Account
                 </Typography>
                 <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
                     <Grid container spacing={2}>
@@ -104,17 +97,8 @@ export default function RegisterScreen() {
                                 fullWidth
                                 id="username"
                                 label="Username"
+                                defaultValue={auth.user ? auth.user.username : ""}
                                 autoFocus
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <TextField
-                                required
-                                fullWidth
-                                id="email"
-                                label="Email Address"
-                                name="email"
-                                autoComplete="email"
                             />
                         </Grid>
                         <Grid item xs={12}>
@@ -146,15 +130,8 @@ export default function RegisterScreen() {
                         variant="contained"
                         sx={{ mt: 3, mb: 2, bgcolor: '#333', color: 'white', '&:hover': { bgcolor: '#555' } }}
                     >
-                        Sign Up
+                        Update Account
                     </Button>
-                    <Grid container justifyContent="flex-end">
-                        <Grid item>
-                            <Link href="/login/" variant="body2">
-                                Already have an account? Sign in
-                            </Link>
-                        </Grid>
-                    </Grid>
                 </Box>
             </Box>
             <Copyright sx={{ mt: 5 }} />

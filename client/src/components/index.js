@@ -1,4 +1,5 @@
 import AppBanner from './AppBanner'
+import EditAccount from './EditAccount'
 import EditToolbar from './EditToolbar'
 import HomeScreen from './HomeScreen'
 import HomeWrapper from './HomeWrapper'
@@ -19,12 +20,12 @@ import WorkspaceScreen from './WorkspaceScreen'
     
     @author McKilla Gorilla
 */
-export { 
-    AppBanner,  
-    EditToolbar, 
+export {
+    AppBanner,
+    EditToolbar,
     HomeScreen,
     HomeWrapper,
-    ListCard, 
+    ListCard,
     LoginScreen,
     MUIDeleteModal,
     MUIEditSongModal,
@@ -33,5 +34,7 @@ export {
     SongCard,
     RegisterScreen,
     SplashScreen,
-    Statusbar, 
-    WorkspaceScreen }
+    Statusbar,
+    WorkspaceScreen,
+    EditAccount
+}

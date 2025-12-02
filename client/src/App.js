@@ -9,7 +9,8 @@ import {
     LoginScreen,
     RegisterScreen,
     Statusbar,
-    WorkspaceScreen
+    WorkspaceScreen,
+    EditAccount
 } from './components'
 /*
   This is the entry-point for our application. Notice that we
@@ -17,17 +18,18 @@ import {
   
   @author McKilla Gorilla
 */
-const App = () => {   
+const App = () => {
     return (
         <BrowserRouter>
             <AuthContextProvider>
-                <GlobalStoreContextProvider>              
+                <GlobalStoreContextProvider>
                     <AppBanner />
                     <Switch>
                         <Route path="/" exact component={HomeWrapper} />
                         <Route path="/login/" exact component={LoginScreen} />
                         <Route path="/register/" exact component={RegisterScreen} />
                         <Route path="/playlist/:id" exact component={WorkspaceScreen} />
+                        <Route path="/updateAccount/" exact component={EditAccount} />
                     </Switch>
                     <Statusbar />
                 </GlobalStoreContextProvider>

@@ -96,6 +96,58 @@ logoutUser = async (req, res) => {
     }).send();
 }
 
+updateUser = async (req, res) => {
+    try {
+        const { email, username, password, passwordVerify, avatarPng } = req.body;
+        console.log("update user: " + username);
+
+        if (!email) {
+            return res.status(400).json({ errorMessage: "Email is required to identify user." });
+        }
+
+        let passwordHash = undefined;
+        if (password && passwordVerify) {
+            if (password.length < 8) {
+                return res.status(400).json({ errorMessage: "Please enter a password of at least 8 characters." });
+            }
+            if (password !== passwordVerify) {
+                return res.status(400).json({ errorMessage: "Please enter the same password twice." });
+            }
+            const saltRounds = 10;
+            const salt = await bcrypt.genSalt(saltRounds);
+            passwordHash = await bcrypt.hash(password, salt);
+        }
+
+        const updatedUser = await DatabaseManager.updateUser(email, username, passwordHash, avatarPng);
+
+        if (!updatedUser) {
+            return res.status(400).json({ success: false, errorMessage: "User not found." });
+        }
+
+        // LOGIN THE USER
+        const token = auth.signToken(updatedUser._id);
+
+        await res.cookie("token", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none"
+        }).status(200).json({
+            success: true,
+            user: {
+                username: updatedUser.username,
+                email: updatedUser.email,
+                avatarPng: updatedUser.avatarPng
+            }
+        })
+
+        console.log("token sent");
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send();
+    }
+}
+
 registerUser = async (req, res) => {
     console.log("REGISTERING USER IN BACKEND");
     try {
@@ -145,7 +197,6 @@ registerUser = async (req, res) => {
 
         console.log("new user saved: " + savedUser._id);
 
-        // LOGIN THE USER
         const token = auth.signToken(savedUser._id);
         console.log("token:" + token);
 
@@ -174,5 +225,6 @@ module.exports = {
     getLoggedIn,
     registerUser,
     loginUser,
-    logoutUser
+    logoutUser,
+    updateUser
 }

@@ -31,6 +31,10 @@ class DatabaseManager {
         return await MongoDatabaseManagerAuth.createSavedUser(username, email, passwordHash, avatarPng)
     }
 
+    static updateUser = async (email, username, passwordHash, avatarPng) => {
+        return await MongoDatabaseManagerAuth.updateUser(email, username, passwordHash, avatarPng)
+    }
+
     static createPlaylist = async (req, body) => {
         return MongoDatabaseManagerStore.createPlaylist(req, body)
     }

@@ -34,6 +34,10 @@ export default function AppBanner() {
         auth.logoutUser();
     }
 
+    const handleEditAccount = () => {
+        handleMenuClose();
+    }
+
     const handleHouseClick = () => {
         store.closeCurrentList();
     }
@@ -75,6 +79,7 @@ export default function AppBanner() {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
+            <MenuItem onClick={handleEditAccount}><Link to='/updateAccount/'>Edit Account</Link></MenuItem>
             <MenuItem onClick={handleLogout}>Logout</MenuItem>
         </Menu>
 
@@ -102,7 +107,7 @@ export default function AppBanner() {
                         component="div"
                         sx={{ display: { xs: 'none', sm: 'block' } }}
                     >
-                        <Link onClick={handleHouseClick} style={{ textDecoration: 'none', color: 'white' }} to='/'>⌂</Link>
+                        <Link onClick={handleHouseClick} style={{ textDecoration: 'none', color: 'white' }} to='/playlists'>⌂</Link>
                     </Typography>
                     <Box sx={{ flexGrow: 1 }}></Box>
                     <Box sx={{ height: "90px", display: { xs: 'none', md: 'flex' } }}>

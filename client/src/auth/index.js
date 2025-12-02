@@ -10,7 +10,8 @@ export const AuthActionType = {
     GET_LOGGED_IN: "GET_LOGGED_IN",
     LOGIN_USER: "LOGIN_USER",
     LOGOUT_USER: "LOGOUT_USER",
-    REGISTER_USER: "REGISTER_USER"
+    REGISTER_USER: "REGISTER_USER",
+    UPDATE_USER: "UPDATE_USER"
 }
 
 function AuthContextProvider(props) {
@@ -56,6 +57,13 @@ function AuthContextProvider(props) {
                     errorMessage: payload.errorMessage
                 })
             }
+            case AuthActionType.UPDATE_USER: {
+                return setAuth({
+                    user: payload.user,
+                    loggedIn: payload.loggedIn,
+                    errorMessage: payload.errorMessage
+                })
+            }
             default:
                 return auth;
         }
@@ -71,6 +79,34 @@ function AuthContextProvider(props) {
                     user: response.data.user
                 }
             });
+        }
+    }
+
+    auth.updateUser = async function (username, avatarPng, password, passwordVerify) {
+        console.log("UPDATING USER");
+        try {
+            const response = await authRequestSender.updateUser(auth.user.email, username, avatarPng, password, passwordVerify);
+            if (response.status === 200) {
+                console.log("Updated Sucessfully");
+                authReducer({
+                    type: AuthActionType.UPDATE_USER,
+                    payload: {
+                        user: response.data.user,
+                        loggedIn: true,
+                        errorMessage: null
+                    }
+                })
+                history.goBack();
+            }
+        } catch (error) {
+            authReducer({
+                type: AuthActionType.UPDATE_USER,
+                payload: {
+                    user: auth.user,
+                    loggedIn: false,
+                    errorMessage: error.response.data.errorMessage
+                }
+            })
         }
     }
 
@@ -118,7 +154,7 @@ function AuthContextProvider(props) {
                         errorMessage: null
                     }
                 })
-                history.push("/");
+                history.push("/playlists");
             }
         } catch (error) {
             authReducer({

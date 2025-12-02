@@ -12,6 +12,15 @@ class MongoDatabaseManagerAuth {
         let new_user = new User({ username, email, passwordHash, avatarPng });
         return new_user.save()
     }
+
+    static updateUser = async (email, username, passwordHash, avatarPng) => {
+        const updates = {};
+        if (username) updates.username = username;
+        if (passwordHash) updates.passwordHash = passwordHash;
+        if (avatarPng) updates.avatarPng = avatarPng;
+
+        return User.findOneAndUpdate({ email: email }, { $set: updates }, { new: true })
+    }
 }
 
 class MongoDatabaseManagerStore {

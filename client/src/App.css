@@ -7,7 +7,7 @@
         @author McKilla Gorilla
     */
   --swatch-foundation: #eeeedd;
-  --swatch-primary: #e6e6e6;
+  --swatch-primary: antiquewhite;
   --swatch-complement: #e1e4cb;
   --swatch-contrast: #999999;
   --swatch-accent: #669966;
@@ -55,7 +55,7 @@ body {
 }
 
 #splash-screen {
-  background-color: antiquewhite;
+  background-color: transparent;
   background-size: cover;
   color: rgb(0, 0, 0);
   font-size: 6vw;

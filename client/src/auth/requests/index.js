@@ -96,12 +96,33 @@ export async function registerUser(firstName, lastName, email, password, passwor
     return { data: data, status: res.status, statusText: res.statusText };
 }
 
+export async function updateUser(email, username, avatarPng, password, passwordVerify) {
+    const res = await api(`/updateAccount/`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            email: email,
+            username: username,
+            avatarPng: avatarPng,
+            password: password,
+            passwordVerify: passwordVerify
+        })
+    });
+
+    let data = { success: false };
+    try {
+        data = await res.json();
+    } catch (err) { }
+
+    return { data: data, status: res.status, statusText: res.statusText };
+}
 
 const apis = {
     getLoggedIn,
     registerUser,
     loginUser,
-    logoutUser
+    logoutUser,
+    updateUser
 }
 
 export default apis

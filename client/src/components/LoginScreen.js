@@ -35,38 +35,44 @@ export default function LoginScreen() {
     console.log(modalJSX);
 
     return (
-        <Grid container component="main" sx={{ height: '100vh' }}>
-            <CssBaseline />
+        <Grid container component="main" sx={{ height: '90%', overflow: 'hidden', m: 0 }}>
             <Grid
                 item
-                xs={false}
-                sm={4}
-                md={7}
+                xs={12} sm={12} md={12}
                 sx={{
-                    backgroundRepeat: 'no-repeat',
-                    backgroundColor: (t) =>
-                        t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
+                    flexGrow: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                    bgcolor: 'transparent'
                 }}
-            />
-            <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+            >
                 <Box
                     sx={{
-                        my: 8,
-                        mx: 4,
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
+                        height: '100%',
+                        gap: 5,
+                        pt: 10
                     }}
                 >
-                    <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-                        <LockOutlinedIcon />
+                    <Avatar
+                        sx={{
+                            // 50px on Mobile (xs), 100px on Desktop (md)
+                            width: { xs: 50, md: 100 },
+                            height: { xs: 50, md: 100 },
+                            bgcolor: 'secondary.main',
+                            m: 0
+                        }}
+                    >
+                        <LockOutlinedIcon sx={{ fontSize: { xs: 30, md: 60 } }} />
                     </Avatar>
-                    <Typography component="h1" variant="h5">
+
+                    <Typography component="h1" variant="h3">
                         Sign in
                     </Typography>
-                    <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+                    <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 2 }}>
                         <TextField
                             margin="normal"
                             required
@@ -91,7 +97,7 @@ export default function LoginScreen() {
                             type="submit"
                             fullWidth
                             variant="contained"
-                            sx={{ mt: 3, mb: 2 }}
+                            sx={{ mt: 3, mb: 2, bgcolor: '#333', color: 'white', '&:hover': { bgcolor: '#555' } }}
                         >
                             Sign In
                         </Button>
@@ -106,7 +112,6 @@ export default function LoginScreen() {
                     </Box>
                 </Box>
             </Grid>
-            {modalJSX}
         </Grid>
     );
 }
