@@ -14,12 +14,12 @@ const BASE_URL = 'http://localhost:4000/auth';
 
 export async function api(path, options = {}) {
     const url = `${BASE_URL}${path}`;
-    
+
     const res = await fetch(url, {
         credentials: 'include',
         ...options,
-    }); 
-    
+    });
+
     return res;
 }
 
@@ -30,7 +30,7 @@ export async function api(path, options = {}) {
 // WE NEED TO PUT THINGS INTO THE DATABASE OR IF WE HAVE SOME
 // CUSTOM FILTERS FOR QUERIES
 
-export async function getLoggedIn(){
+export async function getLoggedIn() {
     const res = await api(`/loggedIn/`, {
         method: 'GET'
     });
@@ -38,12 +38,12 @@ export async function getLoggedIn(){
     let data = { success: false };
     try {
         data = await res.json();
-    } catch (err) {}
+    } catch (err) { }
 
-    return {data: data, status: res.status, statusText:res.statusText};
+    return { data: data, status: res.status, statusText: res.statusText };
 }
 
-export async function loginUser(email, password){
+export async function loginUser(email, password) {
     const res = await api(`/login/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -56,13 +56,13 @@ export async function loginUser(email, password){
     let data = { success: false };
     try {
         data = await res.json();
-    } catch (err) {}
+    } catch (err) { }
 
-    return {data: data, status: res.status, statusText:res.statusText};
+    return { data: data, status: res.status, statusText: res.statusText };
 }
 
 
-export async function logoutUser(){
+export async function logoutUser() {
     const res = await api(`/logout/`, {
         method: 'GET'
     });
@@ -70,30 +70,30 @@ export async function logoutUser(){
     let data = { success: false };
     try {
         data = await res.json();
-    } catch (err) {}
+    } catch (err) { }
 
-    return {data: data, status: res.status, statusText:res.statusText};
+    return { data: data, status: res.status, statusText: res.statusText };
 }
 
-export async function registerUser(firstName, lastName, email, password, passwordVerify){
+export async function registerUser(firstName, lastName, email, password, passwordVerify) {
     const res = await api(`/register/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            firstName : firstName,
-            lastName : lastName,
-            email : email,
-            password : password,
-            passwordVerify : passwordVerify
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            password: password,
+            passwordVerify: passwordVerify
         })
     });
 
     let data = { success: false };
     try {
         data = await res.json();
-    } catch (err) {}
+    } catch (err) { }
 
-    return {data: data, status: res.status, statusText:res.statusText};
+    return { data: data, status: res.status, statusText: res.statusText };
 }
 
 

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import AuthContext from '../auth';
 import { GlobalStoreContext } from '../store'
 
-import EditToolbar from './EditToolbar'
+
 
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import AppBar from '@mui/material/AppBar';
@@ -13,6 +13,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
+import Avatar from '@mui/material/Avatar';
 
 export default function AppBanner() {
     const { auth } = useContext(AuthContext);
@@ -58,7 +59,7 @@ export default function AppBanner() {
             <MenuItem onClick={handleMenuClose}><Link to='/register/'>Create New Account</Link></MenuItem>
         </Menu>
     );
-    const loggedInMenu = 
+    const loggedInMenu =
         <Menu
             anchorEl={anchorEl}
             anchorOrigin={{
@@ -75,39 +76,35 @@ export default function AppBanner() {
             onClose={handleMenuClose}
         >
             <MenuItem onClick={handleLogout}>Logout</MenuItem>
-        </Menu>        
+        </Menu>
 
-    let editToolbar = "";
     let menu = loggedOutMenu;
     if (auth.loggedIn) {
         menu = loggedInMenu;
-        if (store.currentList) {
-            editToolbar = <EditToolbar />;
-        }
     }
-    
+
     function getAccountMenu(loggedIn) {
-        let userInitials = auth.getUserInitials();
-        console.log("userInitials: " + userInitials);
-        if (loggedIn) 
-            return <div>{userInitials}</div>;
+        let userAvatar = auth.getUserAvatar();
+        console.log("userAvatar: " + userAvatar);
+        if (loggedIn)
+            return <Avatar src={userAvatar} sx={{ m: 1, bgcolor: 'secondary.main', width: 50, height: 50 }}></Avatar>
         else
             return <AccountCircle />;
     }
 
     return (
-        <Box sx={{flexGrow: 1}}>
-            <AppBar position="static">
+        <Box sx={{ flexGrow: 1 }}>
+            <AppBar position="static" sx={{ bgcolor: 'purple' }}>
                 <Toolbar>
-                    <Typography                        
+                    <Typography
                         variant="h4"
                         noWrap
                         component="div"
-                        sx={{ display: { xs: 'none', sm: 'block' } }}                        
+                        sx={{ display: { xs: 'none', sm: 'block' } }}
                     >
                         <Link onClick={handleHouseClick} style={{ textDecoration: 'none', color: 'white' }} to='/'>⌂</Link>
                     </Typography>
-                    <Box sx={{ flexGrow: 1 }}>{editToolbar}</Box>
+                    <Box sx={{ flexGrow: 1 }}></Box>
                     <Box sx={{ height: "90px", display: { xs: 'none', md: 'flex' } }}>
                         <IconButton
                             size="large"
@@ -118,7 +115,7 @@ export default function AppBanner() {
                             onClick={handleProfileMenuOpen}
                             color="inherit"
                         >
-                            { getAccountMenu(auth.loggedIn) }
+                            {getAccountMenu(auth.loggedIn)}
                         </IconButton>
                     </Box>
                 </Toolbar>

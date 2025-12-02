@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState, useRef } from 'react'; // Import useState and useRef
 import AuthContext from '../auth'
 import MUIErrorModal from './MUIErrorModal'
 import Copyright from './Copyright'
@@ -17,25 +17,42 @@ import Typography from '@mui/material/Typography';
 export default function RegisterScreen() {
     const { auth } = useContext(AuthContext);
 
+    const [image, setImage] = useState(null);
+    const fileInputRef = useRef(null);
+
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            if (file.size > 250 * 250) {
+                alert("File size must be less than 250 x 250 pixels");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setImage(e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleSubmit = (event) => {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
+
         auth.registerUser(
-            formData.get('firstName'),
-            formData.get('lastName'),
+            formData.get('username'),
+            image,
             formData.get('email'),
             formData.get('password'),
-            formData.get('passwordVerify'),
-            formData.get('avatarPng')
+            formData.get('passwordVerify')
         );
     };
 
-    let modalJSX = ""
-    console.log(auth);
+    let modalJSX = "";
     if (auth.errorMessage !== null) {
         modalJSX = <MUIErrorModal />;
     }
-    console.log(modalJSX);
 
     return (
         <Container component="main" maxWidth="xs">
@@ -48,15 +65,38 @@ export default function RegisterScreen() {
                     alignItems: 'center',
                 }}
             >
-                <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-                    <LockOutlinedIcon />
-                </Avatar>
+
+
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    style={{ display: 'none' }}
+                    accept="image/*"
+                    name="avatarPng"
+                />
+
                 <Typography component="h1" variant="h5">
                     Sign up
                 </Typography>
                 <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
                     <Grid container spacing={2}>
-                        <Grid item xs={12}>
+                        <Grid item xs={12} sx={{ position: 'relative' }}>
+                            <Box sx={{ position: 'absolute', left: '-85px', top: '0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                <Avatar
+                                    src={image}
+                                    sx={{ m: 1, bgcolor: 'secondary.main', width: 60, height: 60 }}
+                                >
+                                    {!image && <LockOutlinedIcon />}
+                                </Avatar>
+                                <Button
+                                    size="small"
+                                    onClick={() => fileInputRef.current.click()}
+                                    sx={{ fontSize: '0.7rem', minWidth: 'auto' }}
+                                >
+                                    Select
+                                </Button>
+                            </Box>
                             <TextField
                                 autoComplete="username"
                                 name="username"
