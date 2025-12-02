@@ -4,19 +4,19 @@ const db = require('./init')
 
 // FOR AUTH FUNCTIONS 
 class MongoDatabaseManagerAuth {
-    static findOneUser = async(filter) => {
+    static findOneUser = async (filter) => {
         return User.findOne(filter)
     }
 
-    static createSavedUser = async(firstName, lastName, email, passwordHash) => {
-        let new_user = new User({firstName, lastName, email, passwordHash});
+    static createSavedUser = async (firstName, lastName, email, passwordHash, avatarPng) => {
+        let new_user = new User({ firstName, lastName, email, passwordHash, avatarPng });
         return new_user.save()
     }
 }
 
 class MongoDatabaseManagerStore {
 
-    static reset = async() => {
+    static reset = async () => {
         async function clearCollection(collection, collectionName) {
             try {
                 await collection.deleteMany({});
@@ -49,11 +49,11 @@ class MongoDatabaseManagerStore {
         await resetMongo();
     }
 
-    static initDb = async() => {
+    static initDb = async () => {
         const mongoose = require('mongoose')
         return mongoose
             .connect(process.env.DB_CONNECT, { useNewUrlParser: true })
-            .catch(e => {console.error('Connection error', e.message)})
+            .catch(e => { console.error('Connection error', e.message) })
     }
 
     // Create a new playlist based on req, res and body

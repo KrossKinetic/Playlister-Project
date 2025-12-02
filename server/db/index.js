@@ -1,16 +1,16 @@
-const {MongoDatabaseManagerAuth, MongoDatabaseManagerStore} = require('./mongo/index')
+const { MongoDatabaseManagerAuth, MongoDatabaseManagerStore } = require('./mongo/index')
 
 class DatabaseManager {
 
-    static async resetDb(){
+    static async resetDb() {
         await MongoDatabaseManagerStore.reset();
     }
 
-    static async initDatabase(){
+    static async initDatabase() {
         await MongoDatabaseManagerStore.initDb()
     }
 
-    static checkDatabase(){
+    static checkDatabase() {
         const db = require('./mongo/init');
         return new Promise((resolve, reject) => {
             db.on('error', err => {
@@ -23,35 +23,35 @@ class DatabaseManager {
         });
     }
 
-    static findOneUser = async(filter) => {
+    static findOneUser = async (filter) => {
         return await MongoDatabaseManagerAuth.findOneUser(filter)
     }
 
-    static createUser = async(firstName, lastName, email, passwordHash) => {
-        return await MongoDatabaseManagerAuth.createSavedUser(firstName, lastName, email, passwordHash)
+    static createUser = async (firstName, lastName, email, passwordHash, avatarPng) => {
+        return await MongoDatabaseManagerAuth.createSavedUser(firstName, lastName, email, passwordHash, avatarPng)
     }
 
-    static createPlaylist = async(req, body) => {
+    static createPlaylist = async (req, body) => {
         return MongoDatabaseManagerStore.createPlaylist(req, body)
     }
 
-    static deletePlaylist = async(req) => {
+    static deletePlaylist = async (req) => {
         return MongoDatabaseManagerStore.deletePlaylist(req)
     }
 
-    static updatePlaylist = async(req, body) => {
+    static updatePlaylist = async (req, body) => {
         return MongoDatabaseManagerStore.updatePlaylist(req, body)
     }
 
-    static getPlaylist = async() => {
+    static getPlaylist = async () => {
         return MongoDatabaseManagerStore.getPlaylist()
     }
 
-    static getPlaylistPairs = async(req) => {
+    static getPlaylistPairs = async (req) => {
         return MongoDatabaseManagerStore.getPlaylistPairs(req)
     }
 
-    static getPlaylistById = async(req) => {
+    static getPlaylistById = async (req) => {
         return MongoDatabaseManagerStore.getPlaylistById(req)
     }
 }

@@ -13,7 +13,7 @@ getLoggedIn = async (req, res) => {
             })
         }
 
-        const loggedInUser = await DatabaseManager.findOneUser({_id: userId});
+        const loggedInUser = await DatabaseManager.findOneUser({ _id: userId });
 
         console.log("loggedInUser: " + loggedInUser);
 
@@ -22,7 +22,8 @@ getLoggedIn = async (req, res) => {
             user: {
                 firstName: loggedInUser.firstName,
                 lastName: loggedInUser.lastName,
-                email: loggedInUser.email
+                email: loggedInUser.email,
+                avatarPng: loggedInUser.avatarPng
             }
         })
     } catch (err) {
@@ -76,8 +77,9 @@ loginUser = async (req, res) => {
             success: true,
             user: {
                 firstName: existingUser.firstName,
-                lastName: existingUser.lastName,  
-                email: existingUser.email              
+                lastName: existingUser.lastName,
+                email: existingUser.email,
+                avatarPng: existingUser.avatarPng
             }
         })
 
@@ -99,7 +101,7 @@ logoutUser = async (req, res) => {
 registerUser = async (req, res) => {
     console.log("REGISTERING USER IN BACKEND");
     try {
-        const { firstName, lastName, email, password, passwordVerify } = req.body;
+        const { firstName, lastName, email, password, passwordVerify, avatarPng } = req.body;
         console.log("create user: " + firstName + " " + lastName + " " + email + " " + password + " " + passwordVerify);
         if (!firstName || !lastName || !email || !password || !passwordVerify) {
             return res
@@ -141,7 +143,7 @@ registerUser = async (req, res) => {
         const passwordHash = await bcrypt.hash(password, salt);
         console.log("passwordHash: " + passwordHash);
 
-        const savedUser = await DatabaseManager.createUser(firstName, lastName, email, passwordHash);
+        const savedUser = await DatabaseManager.createUser(firstName, lastName, email, passwordHash, avatarPng);
 
         console.log("new user saved: " + savedUser._id);
 
@@ -157,8 +159,9 @@ registerUser = async (req, res) => {
             success: true,
             user: {
                 firstName: savedUser.firstName,
-                lastName: savedUser.lastName,  
-                email: savedUser.email              
+                lastName: savedUser.lastName,
+                email: savedUser.email,
+                avatarPng: savedUser.avatarPng
             }
         })
 
