@@ -107,7 +107,13 @@ export default function AppBanner() {
                         component="div"
                         sx={{ display: { xs: 'none', sm: 'block' } }}
                     >
-                        <Link onClick={handleHouseClick} style={{ textDecoration: 'none', color: 'white' }} to='/playlists'>⌂</Link>
+                        {
+                            auth.loggedIn ? (
+                                <Link onClick={handleHouseClick} style={{ textDecoration: 'none', color: 'white' }} to='/playlists'>⌂</Link>
+                            ) : (
+                                <Link onClick={handleHouseClick} style={{ textDecoration: 'none', color: 'white' }} to='/'>⌂</Link>
+                            )
+                        }
                     </Typography>
                     <Box sx={{ flexGrow: 1 }}></Box>
                     <Box sx={{ height: "90px", display: { xs: 'none', md: 'flex' } }}>
