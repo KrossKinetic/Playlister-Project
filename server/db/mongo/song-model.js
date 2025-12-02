@@ -1,0 +1,17 @@
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema
+const ObjectId = Schema.Types.ObjectId
+
+const songSchema = new Schema(
+    {
+        title: { type: String, required: true },
+        artist: { type: String, required: true },
+        year: { type: Number },
+        youTubeId: { type: String },
+        listens: { type: Number, required: true },
+        playlists: { type: [{ type: ObjectId, ref: 'Playlist' }], required: true }
+    },
+    { timestamps: true },
+)
+
+module.exports = mongoose.model('Song', songSchema)
