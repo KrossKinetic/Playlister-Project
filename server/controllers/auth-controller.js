@@ -193,8 +193,8 @@ updateUser = async (req, res) => {
 registerUser = async (req, res) => {
     console.log("REGISTERING USER IN BACKEND");
     try {
-        const { username, email, password, passwordVerify, avatarPng } = req.body;
-        console.log("create user: " + username + " " + email + " " + password + " " + passwordVerify);
+        const { username, avatarPng, email, password, passwordVerify } = req.body;
+        console.log("create user: " + username + " " + avatarPng + " " + email + " " + password + " " + passwordVerify);
         if (!username || !email || !password || !passwordVerify) {
             return res
                 .status(400)

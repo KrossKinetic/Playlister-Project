@@ -100,11 +100,6 @@ export default function RegisterScreen() {
 
     const isFormValid = formData.username && formData.email && formData.password && formData.passwordVerify && isImageValid && !image.isDefault && isPasswordMatch && isPasswordValid;
 
-    let modalJSX = "";
-    if (auth.errorMessage !== null) {
-        modalJSX = <MUIErrorModal />;
-    }
-
     return (
         <Container component="main" maxWidth="xs">
 
@@ -165,14 +160,9 @@ export default function RegisterScreen() {
                                 autoFocus
                                 value={formData.username}
                                 onChange={handleInputChange}
+                                error={!isUsernameValid}
+                                helperText={!isUsernameValid ? "Username must not be all white spaces" : ""}
                             />
-                            {
-                                !isUsernameValid && (
-                                    <Typography variant="body3" color="error">
-                                        Username must not be all white spaces
-                                    </Typography>
-                                )
-                            }
                         </Grid>
                         <Grid item xs={12}>
                             <TextField
@@ -184,14 +174,9 @@ export default function RegisterScreen() {
                                 autoComplete="email"
                                 value={formData.email}
                                 onChange={handleInputChange}
+                                error={!isEmailValid}
+                                helperText={!isEmailValid ? "Please enter a valid email address" : ""}
                             />
-                            {
-                                !isEmailValid && (
-                                    <Typography variant="body3" color="error">
-                                        Please enter a valid email address
-                                    </Typography>
-                                )
-                            }
                         </Grid>
                         <Grid item xs={12}>
                             <TextField
@@ -204,17 +189,10 @@ export default function RegisterScreen() {
                                 autoComplete="new-password"
                                 value={formData.password}
                                 onChange={handleInputChange}
+                                error={!isPasswordValid}
+                                helperText={!isPasswordValid ? "Password must be at least 8 characters long" : ""}
                             />
                         </Grid>
-                        {
-                            !isPasswordValid && (
-                                <Grid item xs={12}>
-                                    <Typography variant="body2" color="error">
-                                        Password must be at least 8 characters long
-                                    </Typography>
-                                </Grid>
-                            )
-                        }
                         <Grid item xs={12}>
                             <TextField
                                 required
@@ -226,17 +204,10 @@ export default function RegisterScreen() {
                                 autoComplete="new-password"
                                 value={formData.passwordVerify}
                                 onChange={handleInputChange}
+                                error={!isPasswordMatch}
+                                helperText={!isPasswordMatch ? "Passwords do not match" : ""}
                             />
                         </Grid>
-                        {
-                            !isPasswordMatch && (
-                                <Grid item xs={12}>
-                                    <Typography variant="body2" color="error">
-                                        Passwords do not match
-                                    </Typography>
-                                </Grid>
-                            )
-                        }
                     </Grid>
                     <Button
                         type="submit"
@@ -247,6 +218,9 @@ export default function RegisterScreen() {
                     >
                         Sign Up
                     </Button>
+                    {
+                        auth.errorMessage !== null && (<Typography variant="body2" color="error">{auth.errorMessage}</Typography>)
+                    }
                     {
                         !isFormValid && (
                             <Grid item xs={12}>
@@ -266,7 +240,6 @@ export default function RegisterScreen() {
                 </Box>
             </Box>
             <Copyright sx={{ mt: 5 }} />
-            {modalJSX}
         </Container >
     );
 }

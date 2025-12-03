@@ -12,7 +12,8 @@ export const AuthActionType = {
     LOGOUT_USER: "LOGOUT_USER",
     REGISTER_USER: "REGISTER_USER",
     UPDATE_USER: "UPDATE_USER",
-    GUEST_LOGIN: "GUEST_LOGIN"
+    GUEST_LOGIN: "GUEST_LOGIN",
+    RESET_ERROR: "RESET_ERROR"
 }
 
 function AuthContextProvider(props) {
@@ -27,6 +28,15 @@ function AuthContextProvider(props) {
     useEffect(() => {
         auth.getLoggedIn();
     }, []);
+
+    useEffect(() => {
+        history.listen((location) => {
+            authReducer({
+                type: AuthActionType.RESET_ERROR,
+                payload: null
+            });
+        });
+    }, [history]);
 
     const authReducer = (action) => {
         const { type, payload } = action;
@@ -79,6 +89,12 @@ function AuthContextProvider(props) {
                     errorMessage: payload.errorMessage
                 })
             }
+            case AuthActionType.RESET_ERROR: {
+                return setAuth((prevAuth) => ({
+                    ...prevAuth,
+                    errorMessage: null
+                }));
+            }
             default:
                 return auth;
         }
@@ -114,6 +130,16 @@ function AuthContextProvider(props) {
                     }
                 })
                 history.goBack();
+            } else {
+                authReducer({
+                    type: AuthActionType.UPDATE_USER,
+                    payload: {
+                        user: auth.user,
+                        loggedIn: false,
+                        guestLoggedIn: false,
+                        errorMessage: response.data.errorMessage
+                    }
+                })
             }
         } catch (error) {
             authReducer({
@@ -122,7 +148,7 @@ function AuthContextProvider(props) {
                     user: auth.user,
                     loggedIn: false,
                     guestLoggedIn: false,
-                    errorMessage: error.response.data.errorMessage
+                    errorMessage: error.message
                 }
             })
         }
@@ -147,6 +173,16 @@ function AuthContextProvider(props) {
                 console.log("NOW WE LOGIN");
                 auth.loginUser(email, password);
                 console.log("LOGGED IN");
+            } else {
+                authReducer({
+                    type: AuthActionType.REGISTER_USER,
+                    payload: {
+                        user: auth.user,
+                        loggedIn: false,
+                        guestLoggedIn: false,
+                        errorMessage: response.data.errorMessage
+                    }
+                })
             }
         } catch (error) {
             console.log("ERROR REGISTERING USER");
@@ -156,7 +192,7 @@ function AuthContextProvider(props) {
                     user: auth.user,
                     loggedIn: false,
                     guestLoggedIn: false,
-                    errorMessage: error.response.data.errorMessage
+                    errorMessage: error.message
                 }
             })
         }
@@ -176,6 +212,16 @@ function AuthContextProvider(props) {
                     }
                 })
                 history.push("/playlists");
+            } else { // Note to self, catch does not catch http errors and thus we need to check the response status
+                authReducer({
+                    type: AuthActionType.LOGIN_USER,
+                    payload: {
+                        user: auth.user,
+                        loggedIn: false,
+                        guestLoggedIn: false,
+                        errorMessage: response.data.errorMessage
+                    }
+                })
             }
         } catch (error) {
             authReducer({
@@ -184,7 +230,7 @@ function AuthContextProvider(props) {
                     user: auth.user,
                     loggedIn: false,
                     guestLoggedIn: false,
-                    errorMessage: error.response.data.errorMessage
+                    errorMessage: error.message
                 }
             })
         }
@@ -204,6 +250,16 @@ function AuthContextProvider(props) {
                     }
                 })
                 history.push("/playlists");
+            } else {
+                authReducer({
+                    type: AuthActionType.GUEST_LOGIN,
+                    payload: {
+                        user: auth.user,
+                        loggedIn: false,
+                        guestLoggedIn: false,
+                        errorMessage: response.data.errorMessage
+                    }
+                })
             }
         } catch (error) {
             authReducer({
@@ -212,7 +268,7 @@ function AuthContextProvider(props) {
                     user: auth.user,
                     loggedIn: false,
                     guestLoggedIn: false,
-                    errorMessage: error.response.data.errorMessage
+                    errorMessage: error.message
                 }
             })
         }

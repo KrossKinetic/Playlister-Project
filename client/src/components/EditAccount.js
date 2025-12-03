@@ -172,14 +172,9 @@ export default function EditAccount() {
                                 value={formData.username}
                                 onChange={handleInputChange}
                                 autoFocus
+                                error={!isUsernameValid}
+                                helperText={!isUsernameValid ? "Username must not be all white spaces" : ""}
                             />
-                            {
-                                !isUsernameValid && (
-                                    <Typography variant="body3" color="error">
-                                        Username must not be all white spaces
-                                    </Typography>
-                                )
-                            }
                         </Grid>
                         <Grid item xs={12}>
                             <TextField
@@ -192,17 +187,10 @@ export default function EditAccount() {
                                 autoComplete="new-password"
                                 value={formData.password}
                                 onChange={handleInputChange}
+                                error={!isPasswordValid}
+                                helperText={!isPasswordValid ? "Password must be at least 8 characters long" : ""}
                             />
                         </Grid>
-                        {
-                            !isPasswordValid && (
-                                <Grid item xs={12}>
-                                    <Typography variant="body2" color="error">
-                                        Password must be at least 8 characters long
-                                    </Typography>
-                                </Grid>
-                            )
-                        }
                         <Grid item xs={12}>
                             <TextField
                                 required
@@ -214,17 +202,10 @@ export default function EditAccount() {
                                 autoComplete="new-password"
                                 value={formData.passwordVerify}
                                 onChange={handleInputChange}
+                                error={!isPasswordMatch}
+                                helperText={!isPasswordMatch ? "Passwords do not match" : ""}
                             />
                         </Grid>
-                        {
-                            !isPasswordMatch && (
-                                <Grid item xs={12}>
-                                    <Typography variant="body2" color="error">
-                                        Passwords do not match
-                                    </Typography>
-                                </Grid>
-                            )
-                        }
                     </Grid>
                     <Button
                         type="submit"

@@ -89,13 +89,13 @@ export async function logoutUser() {
     return { data: data, status: res.status, statusText: res.statusText };
 }
 
-export async function registerUser(firstName, lastName, email, password, passwordVerify) {
+export async function registerUser(username, avatarPng, email, password, passwordVerify) {
     const res = await api(`/register/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            firstName: firstName,
-            lastName: lastName,
+            username: username,
+            avatarPng: avatarPng,
             email: email,
             password: password,
             passwordVerify: passwordVerify

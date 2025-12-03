@@ -14,6 +14,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
+import HomeIcon from '@mui/icons-material/Home';
 
 export default function AppBanner() {
     const { auth } = useContext(AuthContext);
@@ -45,6 +46,10 @@ export default function AppBanner() {
 
     const handleHouseClick = () => {
         store.closeCurrentList();
+    }
+
+    const handleHouseClickGuest = () => {
+        auth.logoutUser();
     }
 
     const menuId = 'primary-search-account-menu';
@@ -134,10 +139,12 @@ export default function AppBanner() {
                         sx={{ display: { xs: 'none', sm: 'block' } }}
                     >
                         {
-                            auth.loggedIn ? (
-                                <Link onClick={handleHouseClick} style={{ textDecoration: 'none', color: 'white' }} to='/playlists'>⌂</Link>
+                            auth.guestLoggedIn ? (
+                                <Link onClick={handleHouseClickGuest} style={{ textDecoration: 'none', color: 'white' }} to='/'><HomeIcon /></Link>
+                            ) : auth.loggedIn ? (
+                                <Link onClick={handleHouseClick} style={{ textDecoration: 'none', color: 'white' }} to='/playlists'><HomeIcon /></Link>
                             ) : (
-                                <Link onClick={handleHouseClick} style={{ textDecoration: 'none', color: 'white' }} to='/'>⌂</Link>
+                                <Link onClick={handleHouseClick} style={{ textDecoration: 'none', color: 'white' }} to='/'><HomeIcon /></Link>
                             )
                         }
                     </Typography>

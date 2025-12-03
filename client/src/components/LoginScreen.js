@@ -1,8 +1,6 @@
 import { useContext } from 'react';
 import AuthContext from '../auth'
-import MUIErrorModal from './MUIErrorModal'
 import Copyright from './Copyright'
-
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -22,14 +20,10 @@ export default function LoginScreen() {
             formData.get('email'),
             formData.get('password')
         );
-
     };
 
     let modalJSX = "";
-    console.log(auth);
-    if (auth.errorMessage !== null) {
-        modalJSX = <MUIErrorModal />;
-    }
+    console.log("auth.errorMessage: ", auth.errorMessage);
     console.log(modalJSX);
 
     return (
@@ -57,7 +51,6 @@ export default function LoginScreen() {
                 >
                     <Avatar
                         sx={{
-                            // 50px on Mobile (xs), 100px on Desktop (md)
                             width: { xs: 50, md: 100 },
                             height: { xs: 50, md: 100 },
                             bgcolor: 'secondary.main',
@@ -91,6 +84,9 @@ export default function LoginScreen() {
                             id="password"
                             autoComplete="current-password"
                         />
+                        {
+                            auth.errorMessage !== null && (<Typography variant="body2" color="error">{auth.errorMessage}</Typography>)
+                        }
                         <Button
                             type="submit"
                             fullWidth
