@@ -61,6 +61,20 @@ export async function loginUser(email, password) {
     return { data: data, status: res.status, statusText: res.statusText };
 }
 
+export async function loginGuest() {
+    const res = await api(`/loginGuest/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    });
+
+    let data = { success: false };
+    try {
+        data = await res.json();
+    } catch (err) { }
+
+    return { data: data, status: res.status, statusText: res.statusText };
+}
+
 
 export async function logoutUser() {
     const res = await api(`/logout/`, {
@@ -121,6 +135,7 @@ const apis = {
     getLoggedIn,
     registerUser,
     loginUser,
+    loginGuest,
     logoutUser,
     updateUser
 }

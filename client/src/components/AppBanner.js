@@ -29,6 +29,11 @@ export default function AppBanner() {
         setAnchorEl(null);
     };
 
+    const handleGuestMenu = () => {
+        handleMenuClose();
+        auth.logoutGuest();
+    }
+
     const handleLogout = () => {
         handleMenuClose();
         auth.logoutUser();
@@ -82,10 +87,31 @@ export default function AppBanner() {
             <MenuItem onClick={handleEditAccount}><Link to='/updateAccount/'>Edit Account</Link></MenuItem>
             <MenuItem onClick={handleLogout}>Logout</MenuItem>
         </Menu>
-
+    const guestMenu =
+        <Menu
+            anchorEl={anchorEl}
+            anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+            }}
+            id={menuId}
+            keepMounted
+            transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+            }}
+            open={isMenuOpen}
+            onClose={handleMenuClose}
+        >
+            <MenuItem onClick={handleGuestMenu}><Link to='/login/'>Login</Link></MenuItem>
+            <MenuItem onClick={handleGuestMenu}><Link to='/register/'>Create Account</Link></MenuItem>
+        </Menu>
     let menu = loggedOutMenu;
     if (auth.loggedIn) {
         menu = loggedInMenu;
+    }
+    if (auth.guestLoggedIn) {
+        menu = guestMenu;
     }
 
     function getAccountMenu(loggedIn) {

@@ -4,6 +4,7 @@ const AuthController = require('../controllers/auth-controller')
 
 router.post('/register', AuthController.registerUser)
 router.post('/login', AuthController.loginUser)
+router.post('/loginGuest', AuthController.loginGuest)
 router.get('/logout', AuthController.logoutUser)
 router.get('/loggedIn', AuthController.getLoggedIn)
 router.put('/updateAccount', AuthController.updateUser)

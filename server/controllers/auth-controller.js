@@ -2,6 +2,14 @@ const auth = require('../auth')
 const DatabaseManager = require('../db/index')
 const bcrypt = require('bcryptjs')
 
+const GUEST_USER = {
+    _id: "guest_user_id",
+    username: "Guest",
+    email: "h7g2f9d4s1@guest.playlister.com",
+    passwordHash: "",
+    avatarPng: "https://robohash.org/Guest.png"
+}
+
 getLoggedIn = async (req, res) => {
     try {
         let userId = auth.verifyUser(req);
@@ -10,6 +18,17 @@ getLoggedIn = async (req, res) => {
                 loggedIn: false,
                 user: null,
                 errorMessage: "?"
+            })
+        }
+
+        if (userId === GUEST_USER._id) {
+            return res.status(200).json({
+                loggedIn: true,
+                user: {
+                    username: GUEST_USER.username,
+                    email: GUEST_USER.email,
+                    avatarPng: GUEST_USER.avatarPng
+                }
             })
         }
 
@@ -81,6 +100,29 @@ loginUser = async (req, res) => {
             }
         })
 
+    } catch (err) {
+        console.error(err);
+        res.status(500).send();
+    }
+}
+
+loginGuest = async (req, res) => {
+    console.log("loginGuest");
+    try {
+        const token = auth.signToken(GUEST_USER._id);
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: true
+        }).status(200).json({
+            success: true,
+            user: {
+                username: GUEST_USER.username,
+                email: GUEST_USER.email,
+                avatarPng: GUEST_USER.avatarPng
+            }
+        })
     } catch (err) {
         console.error(err);
         res.status(500).send();
@@ -225,6 +267,7 @@ module.exports = {
     getLoggedIn,
     registerUser,
     loginUser,
+    loginGuest,
     logoutUser,
     updateUser
 }

@@ -11,13 +11,15 @@ export const AuthActionType = {
     LOGIN_USER: "LOGIN_USER",
     LOGOUT_USER: "LOGOUT_USER",
     REGISTER_USER: "REGISTER_USER",
-    UPDATE_USER: "UPDATE_USER"
+    UPDATE_USER: "UPDATE_USER",
+    GUEST_LOGIN: "GUEST_LOGIN"
 }
 
 function AuthContextProvider(props) {
     const [auth, setAuth] = useState({
         user: null,
         loggedIn: false,
+        guestLoggedIn: false,
         errorMessage: null
     });
     const history = useHistory();
@@ -33,6 +35,7 @@ function AuthContextProvider(props) {
                 return setAuth({
                     user: payload.user,
                     loggedIn: payload.loggedIn,
+                    guestLoggedIn: payload.guestLoggedIn,
                     errorMessage: null
                 });
             }
@@ -40,6 +43,15 @@ function AuthContextProvider(props) {
                 return setAuth({
                     user: payload.user,
                     loggedIn: payload.loggedIn,
+                    guestLoggedIn: payload.guestLoggedIn,
+                    errorMessage: payload.errorMessage
+                })
+            }
+            case AuthActionType.GUEST_LOGIN: {
+                return setAuth({
+                    user: payload.user,
+                    loggedIn: payload.loggedIn,
+                    guestLoggedIn: payload.guestLoggedIn,
                     errorMessage: payload.errorMessage
                 })
             }
@@ -47,6 +59,7 @@ function AuthContextProvider(props) {
                 return setAuth({
                     user: null,
                     loggedIn: false,
+                    guestLoggedIn: false,
                     errorMessage: null
                 })
             }
@@ -54,6 +67,7 @@ function AuthContextProvider(props) {
                 return setAuth({
                     user: payload.user,
                     loggedIn: payload.loggedIn,
+                    guestLoggedIn: payload.guestLoggedIn,
                     errorMessage: payload.errorMessage
                 })
             }
@@ -61,6 +75,7 @@ function AuthContextProvider(props) {
                 return setAuth({
                     user: payload.user,
                     loggedIn: payload.loggedIn,
+                    guestLoggedIn: payload.guestLoggedIn,
                     errorMessage: payload.errorMessage
                 })
             }
@@ -76,7 +91,8 @@ function AuthContextProvider(props) {
                 type: AuthActionType.GET_LOGGED_IN,
                 payload: {
                     loggedIn: response.data.loggedIn,
-                    user: response.data.user
+                    user: response.data.user,
+                    guestLoggedIn: response.data.user?.email === "h7g2f9d4s1@guest.playlister.com"
                 }
             });
         }
@@ -93,6 +109,7 @@ function AuthContextProvider(props) {
                     payload: {
                         user: response.data.user,
                         loggedIn: true,
+                        guestLoggedIn: false,
                         errorMessage: null
                     }
                 })
@@ -104,6 +121,7 @@ function AuthContextProvider(props) {
                 payload: {
                     user: auth.user,
                     loggedIn: false,
+                    guestLoggedIn: false,
                     errorMessage: error.response.data.errorMessage
                 }
             })
@@ -121,6 +139,7 @@ function AuthContextProvider(props) {
                     payload: {
                         user: response.data.user,
                         loggedIn: true,
+                        guestLoggedIn: false,
                         errorMessage: null
                     }
                 })
@@ -136,6 +155,7 @@ function AuthContextProvider(props) {
                 payload: {
                     user: auth.user,
                     loggedIn: false,
+                    guestLoggedIn: false,
                     errorMessage: error.response.data.errorMessage
                 }
             })
@@ -151,6 +171,7 @@ function AuthContextProvider(props) {
                     payload: {
                         user: response.data.user,
                         loggedIn: true,
+                        guestLoggedIn: false,
                         errorMessage: null
                     }
                 })
@@ -162,6 +183,35 @@ function AuthContextProvider(props) {
                 payload: {
                     user: auth.user,
                     loggedIn: false,
+                    guestLoggedIn: false,
+                    errorMessage: error.response.data.errorMessage
+                }
+            })
+        }
+    }
+
+    auth.loginGuest = async function () {
+        try {
+            const response = await authRequestSender.loginGuest();
+            if (response.status === 200) {
+                authReducer({
+                    type: AuthActionType.GUEST_LOGIN,
+                    payload: {
+                        user: response.data.user,
+                        loggedIn: true,
+                        guestLoggedIn: true,
+                        errorMessage: null
+                    }
+                })
+                history.push("/playlists");
+            }
+        } catch (error) {
+            authReducer({
+                type: AuthActionType.GUEST_LOGIN,
+                payload: {
+                    user: auth.user,
+                    loggedIn: false,
+                    guestLoggedIn: false,
                     errorMessage: error.response.data.errorMessage
                 }
             })
@@ -176,6 +226,16 @@ function AuthContextProvider(props) {
                 payload: null
             })
             history.push("/");
+        }
+    }
+
+    auth.logoutGuest = async function () {
+        const response = await authRequestSender.logoutUser();
+        if (response.status === 200) {
+            authReducer({
+                type: AuthActionType.LOGOUT_USER,
+                payload: null
+            })
         }
     }
 

@@ -1,12 +1,15 @@
 import { Box, Button, Typography } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import imageNote from './image_note.png';
+import AuthContext from '../auth'
+import { useContext } from 'react';
 
 export default function SplashScreen() {
     const history = useHistory();
+    const { auth } = useContext(AuthContext);
 
     const handleContinueAsGuest = () => {
-        history.push('/login/');
+        auth.loginGuest();
     }
 
     const handleLogin = () => {
