@@ -63,7 +63,7 @@ function SongCard(props) {
                 {song.title} ({song.year}) by {song.artist}
             </a>
             <Button
-                sx={{transform:"translate(-5%, -5%)", width:"5px", height:"30px"}}
+                sx={{ transform: "translate(-5%, -5%)", width: "5px", height: "30px", borderRadius: 2 }}
                 variant="contained"
                 id={"remove-song-" + index}
                 className="list-card-button"

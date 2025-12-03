@@ -36,9 +36,9 @@ export default function SplashScreen() {
                 }}
             />
             <Box sx={{ display: 'flex', gap: 3 }}>
-                <Button variant="contained" sx={{ bgcolor: '#333', color: 'white', '&:hover': { bgcolor: '#555' } }} onClick={handleContinueAsGuest}>Continue as Guest</Button>
-                <Button variant="contained" sx={{ bgcolor: '#333', color: 'white', '&:hover': { bgcolor: '#555' } }} onClick={handleLogin}>Login</Button>
-                <Button variant="contained" sx={{ bgcolor: '#333', color: 'white', '&:hover': { bgcolor: '#555' } }} onClick={handleRegister}>Create Account</Button>
+                <Button variant="contained" sx={{ borderRadius: 2, bgcolor: '#333', color: 'white', '&:hover': { bgcolor: '#555' } }} onClick={handleContinueAsGuest}>Continue as Guest</Button>
+                <Button variant="contained" sx={{ borderRadius: 2, bgcolor: '#333', color: 'white', '&:hover': { bgcolor: '#555' } }} onClick={handleLogin}>Login</Button>
+                <Button variant="contained" sx={{ borderRadius: 2, bgcolor: '#333', color: 'white', '&:hover': { bgcolor: '#555' } }} onClick={handleRegister}>Create Account</Button>
             </Box>
         </Box>
     )

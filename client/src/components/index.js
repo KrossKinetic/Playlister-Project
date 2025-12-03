@@ -8,12 +8,13 @@ import LoginScreen from './LoginScreen'
 import MUIDeleteModal from './MUIDeleteModal'
 import MUIEditSongModal from './MUIEditSongModal'
 import MUIErrorModal from './MUIErrorModal'
-//import MUIRemoveSongModal from './MUIRemoveSongModal'
 import RegisterScreen from './RegisterScreen'
 import SongCard from './SongCard'
 import SplashScreen from './SplashScreen'
 import Statusbar from './Statusbar'
 import WorkspaceScreen from './WorkspaceScreen'
+import PlaylistsScreen from './PlaylistsScreen'
+import SongsCatalog from './SongsCatalog'
 /*
     This serves as a module so that we can import
     all the other components as we wish.
@@ -30,11 +31,12 @@ export {
     MUIDeleteModal,
     MUIEditSongModal,
     MUIErrorModal,
-    //MUIRemoveSongModal,
     SongCard,
     RegisterScreen,
     SplashScreen,
     Statusbar,
     WorkspaceScreen,
-    EditAccount
+    PlaylistsScreen,
+    EditAccount,
+    SongsCatalog
 }

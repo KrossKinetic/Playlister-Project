@@ -28,10 +28,10 @@ export default function MUIErrorModal() {
     }
 
     return (
-        <Modal open = {auth.errorMessage !== null}>
-         <Alert sx={style} severity="warning">{auth.errorMessage}
-         <Button sx={{color:"black", mt:"20px", ml:"85px", fontSize: 13, fontWeight: 'bold', border: 2}}variant="outlined" onClick={handleCloseButton}>Close</Button>
-         </Alert>
+        <Modal open={auth.errorMessage !== null}>
+            <Alert sx={style} severity="warning">{auth.errorMessage}
+                <Button sx={{ color: "black", mt: "20px", ml: "85px", fontSize: 13, fontWeight: 'bold', border: 2, borderRadius: 2 }} variant="outlined" onClick={handleCloseButton}>Close</Button>
+            </Alert>
         </Modal>
     );
 }

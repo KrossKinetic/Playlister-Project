@@ -150,7 +150,7 @@ export default function EditAccount() {
                                 <Button
                                     size="small"
                                     onClick={() => fileInputRef.current.click()}
-                                    sx={{ fontSize: '0.7rem', minWidth: 'auto', bgcolor: '#333', color: 'white', '&:hover': { bgcolor: '#555' } }}
+                                    sx={{ fontSize: '0.7rem', minWidth: 'auto', borderRadius: 2, bgcolor: '#333', color: 'white', '&:hover': { bgcolor: '#555' } }}
                                 >
                                     Select
                                 </Button>
@@ -211,7 +211,7 @@ export default function EditAccount() {
                         type="submit"
                         fullWidth
                         variant="contained"
-                        sx={{ mt: 3, mb: 2, bgcolor: '#333', color: 'white', '&:hover': { bgcolor: '#555' } }}
+                        sx={{ mt: 3, mb: 2, borderRadius: 2, bgcolor: '#333', color: 'white', '&:hover': { bgcolor: '#555' } }}
                         disabled={!hasChanges || !isFormValid}
                     >
                         Update Account

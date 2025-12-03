@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import AuthContext from '../auth'
 import Copyright from './Copyright'
 import Avatar from '@mui/material/Avatar';
@@ -13,14 +13,28 @@ import Typography from '@mui/material/Typography';
 export default function LoginScreen() {
     const { auth } = useContext(AuthContext);
 
+    const [formData, setFormData] = useState({
+        email: "",
+        password: ""
+    });
+
+    const handleInputChange = (event) => {
+        const { name, value } = event.target;
+        setFormData({
+            ...formData,
+            [name]: value
+        });
+    }
+
     const handleSubmit = (event) => {
         event.preventDefault();
-        const formData = new FormData(event.currentTarget);
         auth.loginUser(
-            formData.get('email'),
-            formData.get('password')
+            formData.email,
+            formData.password
         );
     };
+
+    const isFormValid = formData.email.length > 0 && formData.password.length > 0;
 
     let modalJSX = "";
     console.log("auth.errorMessage: ", auth.errorMessage);
@@ -73,6 +87,8 @@ export default function LoginScreen() {
                             name="email"
                             autoComplete="email"
                             autoFocus
+                            value={formData.email}
+                            onChange={handleInputChange}
                         />
                         <TextField
                             margin="normal"
@@ -83,6 +99,8 @@ export default function LoginScreen() {
                             type="password"
                             id="password"
                             autoComplete="current-password"
+                            value={formData.password}
+                            onChange={handleInputChange}
                         />
                         {
                             auth.errorMessage !== null && (<Typography variant="body2" color="error">{auth.errorMessage}</Typography>)
@@ -91,10 +109,18 @@ export default function LoginScreen() {
                             type="submit"
                             fullWidth
                             variant="contained"
-                            sx={{ mt: 3, mb: 2, bgcolor: '#333', color: 'white', '&:hover': { bgcolor: '#555' } }}
+                            sx={{ mt: 3, mb: 2, borderRadius: 2, bgcolor: '#333', color: 'white', '&:hover': { bgcolor: '#555' } }}
+                            disabled={!isFormValid}
                         >
                             Sign In
                         </Button>
+                        {
+                            !isFormValid && (
+                                <Typography variant="body2" color="error">
+                                    Text Fields must not be empty
+                                </Typography>
+                            )
+                        }
                         <Grid container>
                             <Grid item>
                                 <Link href="/register/" variant="body2">

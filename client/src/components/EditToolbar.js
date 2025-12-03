@@ -33,29 +33,33 @@ function EditToolbar() {
                 disabled={!store.canAddNewSong()}
                 id='add-song-button'
                 onClick={handleAddNewSong}
-                variant="contained">
+                variant="contained"
+                sx={{ borderRadius: 2 }}>
                 <AddIcon />
             </Button>
-            <Button 
+            <Button
                 disabled={!store.canUndo()}
                 id='undo-button'
                 onClick={handleUndo}
-                variant="contained">
-                    <UndoIcon />
+                variant="contained"
+                sx={{ borderRadius: 2 }}>
+                <UndoIcon />
             </Button>
-            <Button 
+            <Button
                 disabled={!store.canRedo()}
                 id='redo-button'
                 onClick={handleRedo}
-                variant="contained">
-                    <RedoIcon />
+                variant="contained"
+                sx={{ borderRadius: 2 }}>
+                <RedoIcon />
             </Button>
-            <Button 
+            <Button
                 disabled={!store.canClose()}
                 id='close-button'
                 onClick={handleClose}
-                variant="contained">
-                    <CloseIcon />
+                variant="contained"
+                sx={{ borderRadius: 2 }}>
+                <CloseIcon />
             </Button>
         </div>
     )

@@ -2,9 +2,6 @@ import { useContext, useState } from 'react';
 import { Link } from 'react-router-dom'
 import AuthContext from '../auth';
 import { GlobalStoreContext } from '../store'
-
-
-
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -15,12 +12,28 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Avatar from '@mui/material/Avatar';
 import HomeIcon from '@mui/icons-material/Home';
+import { Button } from '@mui/material';
+import { useHistory } from 'react-router-dom';
+import { useEffect } from 'react';
 
 export default function AppBanner() {
     const { auth } = useContext(AuthContext);
     const { store } = useContext(GlobalStoreContext);
     const [anchorEl, setAnchorEl] = useState(null);
     const isMenuOpen = Boolean(anchorEl);
+    const history = useHistory();
+
+    const [curPage, setCurPage] = useState(window.location.pathname.substring(1));
+
+    useEffect(() => {
+        history.listen((location) => {
+            if (history.location.pathname === '/playlists') {
+                setCurPage('playlists');
+            } else if (history.location.pathname === '/songs') {
+                setCurPage('songs');
+            }
+        });
+    }, [history]);
 
     const handleProfileMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -50,6 +63,14 @@ export default function AppBanner() {
 
     const handleHouseClickGuest = () => {
         auth.logoutUser();
+    }
+
+    const handlePlaylistsClick = () => {
+        history.push('/playlists');
+    }
+
+    const handleSongsClick = () => {
+        history.push('/songs');
     }
 
     const menuId = 'primary-search-account-menu';
@@ -146,6 +167,31 @@ export default function AppBanner() {
                             ) : (
                                 <Link onClick={handleHouseClick} style={{ textDecoration: 'none', color: 'white' }} to='/'><HomeIcon /></Link>
                             )
+                        }
+                        {
+                            auth.loggedIn ? (
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    size="large"
+                                    onClick={handlePlaylistsClick}
+                                    sx={{ ml: 2, borderRadius: 2, bgcolor: curPage === 'playlists' ? 'black' : 'primary.main', '&:hover': { bgcolor: curPage === 'playlists' ? '#333' : 'primary.dark' } }}
+                                >
+                                    Playlists
+                                </Button>
+                            ) : null
+                        } {
+                            auth.loggedIn ? (
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    size="large"
+                                    onClick={handleSongsClick}
+                                    sx={{ ml: 2, borderRadius: 2, bgcolor: curPage === 'songs' ? 'black' : 'primary.main', '&:hover': { bgcolor: curPage === 'songs' ? '#333' : 'primary.dark' } }}
+                                >
+                                    Songs
+                                </Button>
+                            ) : null
                         }
                     </Typography>
                     <Box sx={{ flexGrow: 1 }}></Box>
