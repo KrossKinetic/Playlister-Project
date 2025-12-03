@@ -15,35 +15,100 @@ import Typography from '@mui/material/Typography';
 export default function EditAccount() {
     const { auth } = useContext(AuthContext);
 
-    const [image, setImage] = useState(auth.user ? auth.user.avatarPng : null);
+    const [image, setImage] = useState({
+        src: auth.user ? auth.user.avatarPng : null,
+        isValid: true,
+        isDefault: true
+    });
+    const [formData, setFormData] = useState({
+        username: "",
+        email: auth.user ? auth.user.email : "",
+        password: "",
+        passwordVerify: ""
+    });
     const fileInputRef = useRef(null);
+
+    const getImageDimensions = (file) => {
+        return new Promise((resolve, reject) => {
+            const url = URL.createObjectURL(file);
+            const img = new Image();
+
+            img.onload = () => {
+                const width = img.width;
+                const height = img.height;
+                URL.revokeObjectURL(url);
+                resolve({ width, height });
+            };
+
+            img.onerror = () => reject(new Error("Failed to load image"));
+
+            img.src = url;
+        });
+    };
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         if (file) {
-            if (file.size > 250 * 250) {
-                alert("File size must be less than 250 x 250 pixels");
-                return;
-            }
+            console.log("Image size: ", file.size);
+            getImageDimensions(file).then(({ width, height }) => {
+                console.log("Image dimensions: ", width, height);
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                setImage(e.target.result);
-            };
-            reader.readAsDataURL(file);
+                if (width !== 250 || height !== 250) {
+                    setImage({ src: null, isValid: false, isDefault: false });
+                    console.log("Image dimensions too large");
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    setImage({ src: e.target.result, isValid: true, isDefault: false });
+                };
+                reader.readAsDataURL(file);
+            });
         }
     };
 
+    const handleInputChange = (event) => {
+        const { name, value } = event.target;
+        setFormData({
+            ...formData,
+            [name]: value
+        });
+    }
+
     const handleSubmit = (event) => {
         event.preventDefault();
-        const formData = new FormData(event.currentTarget);
         auth.updateUser(
-            formData.get('username'),
+            formData.username,
             image,
-            formData.get('password'),
-            formData.get('passwordVerify')
+            formData.password,
+            formData.passwordVerify
         );
     };
+
+    const isPasswordMatch = formData.password === formData.passwordVerify;
+    const isPasswordValid = (formData.password.length >= 8 || formData.password === "");
+
+    const isPassword = (isPasswordMatch && isPasswordValid);
+
+    const isImageValid = (image.isValid === true || (image.src !== auth.user.avatarPng && image.src !== null));
+
+    const isUsernameValid = (formData.username.trim() !== "" || formData.username === "");
+
+    const isFormValid = isImageValid && isPassword && isUsernameValid;
+
+    const hasImageChanged = (image.src !== auth.user.avatarPng);
+    const hasPasswordChanged = (formData.password !== "");
+    const hasUsernameChanged = (formData.username !== "");
+
+    console.log("hasImageChanged: ", hasImageChanged);
+    console.log("hasPasswordChanged: ", hasPasswordChanged);
+    console.log("hasUsernameChanged: ", hasUsernameChanged);
+
+    const hasChanges = hasImageChanged || hasPasswordChanged || hasUsernameChanged;
+
+    console.log("hasChanges: ", hasChanges);
+    console.log("isFormValid: ", isFormValid);
 
     let modalJSX = "";
     if (auth.errorMessage !== null) {
@@ -77,10 +142,10 @@ export default function EditAccount() {
                         <Grid item xs={12} sx={{ position: 'relative' }}>
                             <Box sx={{ position: 'absolute', left: '-85px', top: '0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                 <Avatar
-                                    src={image}
+                                    src={image.src}
                                     sx={{ m: 1, bgcolor: 'secondary.main', width: 60, height: 60 }}
                                 >
-                                    {!image && <LockOutlinedIcon />}
+                                    {!image.src && <LockOutlinedIcon />}
                                 </Avatar>
                                 <Button
                                     size="small"
@@ -89,6 +154,13 @@ export default function EditAccount() {
                                 >
                                     Select
                                 </Button>
+                                {
+                                    !isImageValid && (
+                                        <Typography variant="body3" color="error">
+                                            Image <br /> dimensions <br /> must be <br /> 250 x 250
+                                        </Typography>
+                                    )
+                                }
                             </Box>
                             <TextField
                                 autoComplete="username"
@@ -97,9 +169,17 @@ export default function EditAccount() {
                                 fullWidth
                                 id="username"
                                 label="Username"
-                                defaultValue={auth.user ? auth.user.username : ""}
+                                value={formData.username}
+                                onChange={handleInputChange}
                                 autoFocus
                             />
+                            {
+                                !isUsernameValid && (
+                                    <Typography variant="body3" color="error">
+                                        Username must not be all white spaces
+                                    </Typography>
+                                )
+                            }
                         </Grid>
                         <Grid item xs={12}>
                             <TextField
@@ -110,8 +190,19 @@ export default function EditAccount() {
                                 type="password"
                                 id="password"
                                 autoComplete="new-password"
+                                value={formData.password}
+                                onChange={handleInputChange}
                             />
                         </Grid>
+                        {
+                            !isPasswordValid && (
+                                <Grid item xs={12}>
+                                    <Typography variant="body2" color="error">
+                                        Password must be at least 8 characters long
+                                    </Typography>
+                                </Grid>
+                            )
+                        }
                         <Grid item xs={12}>
                             <TextField
                                 required
@@ -121,17 +212,43 @@ export default function EditAccount() {
                                 type="password"
                                 id="passwordVerify"
                                 autoComplete="new-password"
+                                value={formData.passwordVerify}
+                                onChange={handleInputChange}
                             />
                         </Grid>
+                        {
+                            !isPasswordMatch && (
+                                <Grid item xs={12}>
+                                    <Typography variant="body2" color="error">
+                                        Passwords do not match
+                                    </Typography>
+                                </Grid>
+                            )
+                        }
                     </Grid>
                     <Button
                         type="submit"
                         fullWidth
                         variant="contained"
                         sx={{ mt: 3, mb: 2, bgcolor: '#333', color: 'white', '&:hover': { bgcolor: '#555' } }}
+                        disabled={!hasChanges || !isFormValid}
                     >
                         Update Account
                     </Button>
+                    {
+                        !hasChanges && (
+                            <Typography variant="body2" color="error">
+                                No changes made. Empty fields are not updated.
+                            </Typography>
+                        )
+                    }
+                    {
+                        !isFormValid && (
+                            <Typography variant="body2" color="error">
+                                Form is invalid. Please check your input.
+                            </Typography>
+                        )
+                    }
                 </Box>
             </Box>
             <Copyright sx={{ mt: 5 }} />
