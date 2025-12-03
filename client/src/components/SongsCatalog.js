@@ -1,63 +1,306 @@
+import { useContext, useEffect, useState, useRef, StrictMode } from 'react';
+import { GlobalStoreContext } from '../store';
+import AuthContext from '../auth';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
+import SearchIcon from '@mui/icons-material/Search';
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+import ClearIcon from '@mui/icons-material/Clear';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import YouTubePlayer from './youtube';
+import Typography from '@mui/material/Typography';
 
 function SongsCatalog() {
+    const { store } = useContext(GlobalStoreContext);
+    const { auth } = useContext(AuthContext);
+    const [filteredSongs, setFilteredSongs] = useState([]);
+    const [searchTitle, setSearchTitle] = useState("");
+    const [searchArtist, setSearchArtist] = useState("");
+    const [searchYear, setSearchYear] = useState("");
+    const [sortType, setSortType] = useState("listens-hi-lo");
+    const hasInitialSorted = useRef(false);
+    const [isSongPlaying, setIsSongPlaying] = useState(false);
+    const [currentSongIndex, setCurrentSongIndex] = useState(0);
+
+    useEffect(() => {
+        store.loadSongCatalog();
+    }, []);
+
+    useEffect(() => {
+        if (store.songCatalog.length > 0 && !hasInitialSorted.current) {
+            handleSort("listens-hi-lo");
+            hasInitialSorted.current = true;
+        }
+    }, [store.songCatalog]);
+
+    useEffect(() => {
+        setFilteredSongs(store.songCatalog);
+    }, [store.songCatalog]);
+
+    const getComparator = (type) => {
+        switch (type) {
+            case "listens-hi-lo":
+                return (a, b) => b.listens - a.listens;
+            case "listens-lo-hi":
+                return (a, b) => a.listens - b.listens;
+            case "playlists-hi-lo":
+                return (a, b) => b.playlists - a.playlists;
+            case "playlists-lo-hi":
+                return (a, b) => a.playlists - b.playlists;
+            case "title-a-z":
+                return (a, b) => a.title.localeCompare(b.title);
+            case "title-z-a":
+                return (a, b) => b.title.localeCompare(a.title);
+            case "artist-a-z":
+                return (a, b) => a.artist.localeCompare(b.artist);
+            case "artist-z-a":
+                return (a, b) => b.artist.localeCompare(a.artist);
+            case "year-hi-lo":
+                return (a, b) => b.year - a.year;
+            case "year-lo-hi":
+                return (a, b) => a.year - b.year;
+            default:
+                return null;
+        }
+    };
+
+    const handleSongClick = (song) => {
+        setCurrentSongIndex(filteredSongs.indexOf(song));
+        setIsSongPlaying(true);
+    };
+
+    const handleSort = (type) => {
+        setSortType(type);
+        const comparator = getComparator(type);
+        if (comparator) {
+            const sorted = [...filteredSongs].sort(comparator);
+            setFilteredSongs(sorted);
+        }
+    };
+
+    const handleSearch = () => {
+        const filtered = store.songCatalog.filter(song => {
+            const titleMatch = song.title.toLowerCase().includes(searchTitle.toLowerCase());
+            const artistMatch = song.artist.toLowerCase().includes(searchArtist.toLowerCase());
+            const yearMatch = searchYear === "" || song.year.toString().includes(searchYear);
+            return titleMatch && artistMatch && yearMatch;
+        });
+        const comparator = getComparator(sortType);
+        if (comparator) {
+            filtered.sort(comparator);
+        }
+        setFilteredSongs(filtered);
+    };
+
+    const handleClear = () => {
+        setSearchTitle("");
+        setSearchArtist("");
+        setSearchYear("");
+        setSortType("listens-hi-lo");
+        setIsSongPlaying(false);
+        setCurrentSongIndex(0);
+        setFilteredSongs(store.songCatalog);
+    };
+
     return (
-        <Box sx={{ display: 'flex', width: '100%', height: '80vh' }}>
+        <Box sx={{ display: 'flex', width: '100%', height: '80vh', bgcolor: '#fffff0' }}>
             <Box sx={{ width: '50%', borderRight: '2px solid #9d9d9dff', p: 2 }}>
-                <h1>Songs Catalog</h1>
-                <Box component="form" noValidate onSubmit={(e) => { }} sx={{ mt: 2 }}>
+                <h1 style={{ color: '#aa00aa', fontSize: '3rem', margin: '0 0 20px 0' }}>Songs Catalog</h1>
+                <Box component="form" noValidate onSubmit={(e) => { e.preventDefault(); handleSearch(); }} sx={{ mt: 2 }}>
                     <TextField
                         margin="normal"
                         fullWidth
                         id="title"
-                        label="Filter By Title"
+                        label="by Title"
                         name="title"
                         autoComplete="off"
                         autoFocus
+                        value={searchTitle}
+                        onChange={(e) => setSearchTitle(e.target.value)}
+                        variant="filled"
+                        InputProps={{
+                            disableUnderline: true,
+                            endAdornment: searchTitle && (
+                                <InputAdornment position="end">
+                                    <IconButton onClick={() => setSearchTitle("")} edge="end">
+                                        <ClearIcon />
+                                    </IconButton>
+                                </InputAdornment>
+                            )
+                        }}
+                        sx={{ bgcolor: '#e6e6fa', borderRadius: 1, '& .MuiFilledInput-root': { bgcolor: '#e6e6fa', borderRadius: 1 } }}
                     />
                     <TextField
                         margin="normal"
                         fullWidth
                         name="artist"
-                        label="Filter By Artist"
+                        label="by Artist"
                         id="artist"
                         autoComplete="off"
+                        value={searchArtist}
+                        onChange={(e) => setSearchArtist(e.target.value)}
+                        variant="filled"
+                        InputProps={{
+                            disableUnderline: true,
+                            endAdornment: searchArtist && (
+                                <InputAdornment position="end">
+                                    <IconButton onClick={() => setSearchArtist("")} edge="end">
+                                        <ClearIcon />
+                                    </IconButton>
+                                </InputAdornment>
+                            )
+                        }}
+                        sx={{ bgcolor: '#e6e6fa', borderRadius: 1, '& .MuiFilledInput-root': { bgcolor: '#e6e6fa', borderRadius: 1 } }}
                     />
                     <TextField
                         margin="normal"
                         fullWidth
                         name="year"
-                        label="Filter By Year"
+                        label="by Year"
                         id="year"
                         autoComplete="off"
+                        value={searchYear}
+                        onChange={(e) => setSearchYear(e.target.value)}
+                        variant="filled"
+                        InputProps={{
+                            disableUnderline: true,
+                            endAdornment: searchYear && (
+                                <InputAdornment position="end">
+                                    <IconButton onClick={() => setSearchYear("")} edge="end">
+                                        <ClearIcon />
+                                    </IconButton>
+                                </InputAdornment>
+                            )
+                        }}
+                        sx={{ bgcolor: '#e6e6fa', borderRadius: 1, '& .MuiFilledInput-root': { bgcolor: '#e6e6fa', borderRadius: 1 } }}
                     />
-                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
                         <Button
                             type="button"
-                            fullWidth
                             variant="contained"
-                            sx={{ mt: 3, mb: 2, borderRadius: 2, bgcolor: '#333', color: 'white', '&:hover': { bgcolor: '#555' } }}
-                            disabled={false}
+                            startIcon={<SearchIcon />}
+                            sx={{
+                                borderRadius: 5,
+                                bgcolor: '#6a5acd',
+                                color: 'white',
+                                textTransform: 'none',
+                                fontSize: '1.1rem',
+                                px: 4,
+                                '&:hover': { bgcolor: '#483d8b' }
+                            }}
+                            onClick={handleSearch}
                         >
                             Search
                         </Button>
-                        <Box sx={{ flexGrow: 1 }} /> {/* Spacer */}
                         <Button
                             type="button"
-                            fullWidth
                             variant="contained"
-                            sx={{ mt: 3, mb: 2, borderRadius: 2, bgcolor: '#333', color: 'white', '&:hover': { bgcolor: '#555' } }}
-                            disabled={false}
+                            sx={{
+                                borderRadius: 5,
+                                bgcolor: '#6a5acd',
+                                color: 'white',
+                                textTransform: 'none',
+                                fontSize: '1.1rem',
+                                px: 4,
+                                '&:hover': { bgcolor: '#483d8b' }
+                            }}
+                            onClick={handleClear}
                         >
                             Clear
                         </Button>
                     </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
+                        {
+                            isSongPlaying ? (
+                                <YouTubePlayer playlist={(filteredSongs.length > 0) ? filteredSongs : store.songCatalog} currentSongIndex={currentSongIndex} setCurrentSongIndex={setCurrentSongIndex} />
+                            ) : (
+                                <div></div>
+                            )
+                        }
+                    </Box>
                 </Box>
             </Box>
-            <Box sx={{ width: '50%', p: 2 }}>
-                <h1>Songs Catalog Right</h1>
+            <Box sx={{ width: '50%', p: 2, display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                    <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+                        <InputLabel id="sort-select-label">Sort By</InputLabel>
+                        <Select
+                            labelId="sort-select-label"
+                            id="sort-select"
+                            value={sortType}
+                            label="Sort By"
+                            onChange={(e) => handleSort(e.target.value)}
+                        >
+                            <MenuItem value="listens-hi-lo">Listens (High-Low)</MenuItem>
+                            <MenuItem value="listens-lo-hi">Listens (Low-High)</MenuItem>
+                            <MenuItem value="playlists-hi-lo">Playlists (High-Low)</MenuItem>
+                            <MenuItem value="playlists-lo-hi">Playlists (Low-High)</MenuItem>
+                            <MenuItem value="title-a-z">Title (A-Z)</MenuItem>
+                            <MenuItem value="title-z-a">Title (Z-A)</MenuItem>
+                            <MenuItem value="artist-a-z">Artist (A-Z)</MenuItem>
+                            <MenuItem value="artist-z-a">Artist (Z-A)</MenuItem>
+                            <MenuItem value="year-hi-lo">Year (High-Low)</MenuItem>
+                            <MenuItem value="year-lo-hi">Year (Low-High)</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <Typography variant="h6" sx={{ m: 1 }}>
+                        {filteredSongs.length} Songs
+                    </Typography>
+                </Box>
+                <Box sx={{ overflowY: 'auto', flexGrow: 1 }}>
+                    {
+                        filteredSongs.map((song) => (
+                            <Box
+                                key={song._id}
+                                onClick={() => handleSongClick(song)}
+                                sx={{
+                                    p: 2,
+                                    mb: 2,
+                                    border: song.created_by === auth.user.email ? '2px solid red' : '1px solid #000',
+                                    borderRadius: 2,
+                                    bgcolor: '#ffecb3',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    position: 'relative'
+                                }}
+                            >
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                                    <Box sx={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
+                                        {song.title} by {song.artist} ({song.year})
+                                    </Box>
+                                    {/* Placeholder for menu icon if needed, or just empty for now as per image showing dots */}
+                                    <Box sx={{ cursor: 'pointer' }}>&#8942;</Box>
+                                </Box>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                                    <Box>Listens: {song.listens.toLocaleString()}</Box>
+                                    <Box>Playlists: {song.playlists}</Box>
+                                </Box>
+                            </Box>
+                        ))
+                    }
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'start', pb: 3, pt: 2 }}>
+                    <Button
+                        variant="contained"
+                        sx={{
+                            borderRadius: 5,
+                            bgcolor: '#6a5acd',
+                            color: 'white',
+                            textTransform: 'none',
+                            fontSize: '1.1rem',
+                            px: 4,
+                            '&:hover': { bgcolor: '#483d8b' }
+                        }}
+                        onClick={() => store.createNewSong()}
+                    >
+                        New Song
+                    </Button>
+                </Box>
             </Box>
         </Box>
     );

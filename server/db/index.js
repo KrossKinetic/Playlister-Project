@@ -58,6 +58,14 @@ class DatabaseManager {
     static getPlaylistById = async (req) => {
         return MongoDatabaseManagerStore.getPlaylistById(req)
     }
+
+    static getSongPairs = async (req) => {
+        return MongoDatabaseManagerStore.getSongPairs(req)
+    }
+
+    static createSong = async (req, body) => {
+        return MongoDatabaseManagerStore.createSong(req, body)
+    }
 }
 
 module.exports = DatabaseManager

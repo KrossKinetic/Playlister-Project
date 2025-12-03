@@ -15,6 +15,7 @@ import Statusbar from './Statusbar'
 import WorkspaceScreen from './WorkspaceScreen'
 import PlaylistsScreen from './PlaylistsScreen'
 import SongsCatalog from './SongsCatalog'
+import YouTubePlayer from './youtube'
 /*
     This serves as a module so that we can import
     all the other components as we wish.
@@ -38,5 +39,6 @@ export {
     WorkspaceScreen,
     PlaylistsScreen,
     EditAccount,
-    SongsCatalog
+    SongsCatalog,
+    YouTubePlayer
 }

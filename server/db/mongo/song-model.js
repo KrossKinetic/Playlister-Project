@@ -9,7 +9,8 @@ const songSchema = new Schema(
         year: { type: Number },
         youTubeId: { type: String },
         listens: { type: Number, required: true },
-        playlists: { type: [{ type: ObjectId, ref: 'Playlist' }], required: true }
+        playlists: { type: [{ type: ObjectId, ref: 'Playlist' }], required: true },
+        created_by: { type: String, required: true },
     },
     { timestamps: true },
 )

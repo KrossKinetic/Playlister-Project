@@ -7,8 +7,8 @@ const auth = require('../auth')
     
     @author McKilla Gorilla
 */
-createPlaylist = async(req, res) => {
-    if(auth.verifyUser(req) === null){
+createPlaylist = async (req, res) => {
+    if (auth.verifyUser(req) === null) {
         return res.status(400).json({
             errorMessage: 'UNAUTHORIZED'
         })
@@ -21,7 +21,7 @@ createPlaylist = async(req, res) => {
             errorMessage: 'You must provide a Playlist',
         })
     }
-    
+
     const response = await DatabaseManager.createPlaylist(req, body);
 
     if (!response || !response.success) {
@@ -37,12 +37,12 @@ createPlaylist = async(req, res) => {
     });
 }
 deletePlaylist = async (req, res) => {
-    if(auth.verifyUser(req) === null){
+    if (auth.verifyUser(req) === null) {
         return res.status(400).json({
             errorMessage: 'UNAUTHORIZED'
         })
     }
-    
+
     console.log("delete Playlist with id: " + JSON.stringify(req.params.id));
     console.log("delete " + req.params.id);
 
@@ -61,7 +61,7 @@ deletePlaylist = async (req, res) => {
     });
 }
 getPlaylistById = async (req, res) => {
-    if(auth.verifyUser(req) === null){
+    if (auth.verifyUser(req) === null) {
         return res.status(400).json({
             errorMessage: 'UNAUTHORIZED'
         })
@@ -70,7 +70,7 @@ getPlaylistById = async (req, res) => {
 
     const response = await DatabaseManager.getPlaylistById(req);
 
-    console.log("stuff",response)
+    console.log("stuff", response)
 
     if (!response || !response.success) {
         return res.status(400).json({
@@ -86,7 +86,7 @@ getPlaylistById = async (req, res) => {
 }
 
 getPlaylistPairs = async (req, res) => {
-    if(auth.verifyUser(req) === null){
+    if (auth.verifyUser(req) === null) {
         return res.status(400).json({
             errorMessage: 'UNAUTHORIZED'
         })
@@ -109,15 +109,73 @@ getPlaylistPairs = async (req, res) => {
     });
 }
 
+getSongPairs = async (req, res) => {
+    if (auth.verifyUser(req) === null) {
+        return res.status(400).json({
+            errorMessage: 'UNAUTHORIZED'
+        })
+    }
+
+    console.log("getSongPairs");
+
+    const response = await DatabaseManager.getSongPairs(req);
+
+    if (!response || !response.success) {
+        return res.status(400).json({
+            success: false,
+            errorMessage: response?.message || 'Failed to get song pairs'
+        });
+    }
+
+    return res.status(200).json({
+        success: true,
+        songs: response.songs
+    });
+    return res.status(200).json({
+        success: true,
+        songs: response.songs
+    });
+}
+
+createSong = async (req, res) => {
+    if (auth.verifyUser(req) === null) {
+        return res.status(400).json({
+            errorMessage: 'UNAUTHORIZED'
+        })
+    }
+    const body = req.body;
+    console.log("createSong body: " + JSON.stringify(body));
+    if (!body) {
+        return res.status(400).json({
+            success: false,
+            errorMessage: 'You must provide a Song',
+        })
+    }
+
+    const response = await DatabaseManager.createSong(req, body);
+
+    if (!response || !response.success) {
+        return res.status(400).json({
+            success: false,
+            errorMessage: response?.message || 'Failed to create song'
+        });
+    }
+
+    return res.status(201).json({
+        success: true,
+        song: response.song
+    });
+}
+
 getPlaylists = async (req, res) => {
-    if(auth.verifyUser(req) === null){
+    if (auth.verifyUser(req) === null) {
         return res.status(400).json({
             errorMessage: 'UNAUTHORIZED'
         })
     }
 
     const response = await DatabaseManager.getPlaylist()
-    
+
     if (!response || !response.success) {
         return res.status(400).json({
             success: false,
@@ -131,7 +189,7 @@ getPlaylists = async (req, res) => {
     });
 }
 updatePlaylist = async (req, res) => {
-    if(auth.verifyUser(req) === null){
+    if (auth.verifyUser(req) === null) {
         return res.status(400).json({
             errorMessage: 'UNAUTHORIZED'
         })
@@ -166,6 +224,8 @@ module.exports = {
     deletePlaylist,
     getPlaylistById,
     getPlaylistPairs,
+    getSongPairs,
     getPlaylists,
-    updatePlaylist
+    updatePlaylist,
+    createSong
 }

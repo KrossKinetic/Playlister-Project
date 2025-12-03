@@ -14,12 +14,12 @@ const BASE_URL = 'http://localhost:4000/store';
 
 export async function api(path, options = {}) {
     const url = `${BASE_URL}${path}`;
-    
+
     const res = await fetch(url, {
         credentials: 'include',
         ...options,
-    }); 
-    
+    });
+
     return res;
 }
 
@@ -29,7 +29,7 @@ export async function api(path, options = {}) {
 // WORK, AND SOME REQUIRE DATA, WHICH WE WE WILL FORMAT HERE, FOR WHEN
 // WE NEED TO PUT THINGS INTO THE DATABASE OR IF WE HAVE SOME
 // CUSTOM FILTERS FOR QUERIES
-export async function createPlaylist(newListName, newSongs, userEmail){
+export async function createPlaylist(newListName, newSongs, userEmail) {
     const res = await api('/playlist/', { // This sends you the promise for the Response object
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -43,14 +43,14 @@ export async function createPlaylist(newListName, newSongs, userEmail){
     let data = { success: false };
     try {
         data = await res.json();
-    } catch (err) {}
+    } catch (err) { }
 
     // res.json() is async because that retrieves the actual data, which could be big
-    return {data: data, status: res.status, statusText:res.statusText};
+    return { data: data, status: res.status, statusText: res.statusText };
 }
 
-export async function deletePlaylistById(id){
-    
+export async function deletePlaylistById(id) {
+
     const res = await api(`/playlist/${id}`, {
         method: 'DELETE'
     });
@@ -58,12 +58,12 @@ export async function deletePlaylistById(id){
     let data = { success: false };
     try {
         data = await res.json();
-    } catch (err) {}
+    } catch (err) { }
 
-    return {data: data, status: res.status, statusText:res.statusText};
+    return { data: data, status: res.status, statusText: res.statusText };
 }
 
-export async function getPlaylistById(id){
+export async function getPlaylistById(id) {
     const res = await api(`/playlist/${id}`, {
         method: 'GET'
     });
@@ -71,12 +71,12 @@ export async function getPlaylistById(id){
     let data = { success: false };
     try {
         data = await res.json();
-    } catch (err) {}
+    } catch (err) { }
 
-    return {data: data, status: res.status, statusText:res.statusText};
+    return { data: data, status: res.status, statusText: res.statusText };
 }
 
-export async function getPlaylistPairs(){
+export async function getPlaylistPairs() {
     const res = await api(`/playlistpairs/`, {
         method: 'GET'
     });
@@ -84,12 +84,45 @@ export async function getPlaylistPairs(){
     let data = { success: false };
     try {
         data = await res.json();
-    } catch (err) {}
+    } catch (err) { }
 
-    return {data: data, status: res.status, statusText: res.statusText};
+    return { data: data, status: res.status, statusText: res.statusText };
 }
 
-export async function updatePlaylistById(id, playlist){
+export async function getSongPairs() {
+    const res = await api(`/songpairs/`, {
+        method: 'GET'
+    });
+
+    let data = { success: false };
+    try {
+        data = await res.json();
+    } catch (err) { }
+
+    return { data: data, status: res.status, statusText: res.statusText };
+}
+
+export async function createSong(title, artist, year, youTubeId) {
+    const res = await api(`/song/`, {
+        method: 'POST',
+        body: JSON.stringify({
+            title: title,
+            artist: artist,
+            year: year,
+            youTubeId: youTubeId
+        }),
+        headers: { 'Content-Type': 'application/json' }
+    });
+
+    let data = { success: false };
+    try {
+        data = await res.json();
+    } catch (err) { }
+
+    return { data: data, status: res.status, statusText: res.statusText };
+}
+
+export async function updatePlaylistById(id, playlist) {
     const res = await api(`/playlist/${id}`, {
         method: 'PUT',
         body: JSON.stringify({ playlist }),
@@ -99,9 +132,9 @@ export async function updatePlaylistById(id, playlist){
     let data = { success: false };
     try {
         data = await res.json();
-    } catch (err) {}
+    } catch (err) { }
 
-    return {data: data, status: res.status, statusText: res.statusText};
+    return { data: data, status: res.status, statusText: res.statusText };
 }
 
 const apis = {
@@ -109,7 +142,9 @@ const apis = {
     deletePlaylistById,
     getPlaylistById,
     getPlaylistPairs,
-    updatePlaylistById
+    getSongPairs,
+    updatePlaylistById,
+    createSong
 }
 
 export default apis

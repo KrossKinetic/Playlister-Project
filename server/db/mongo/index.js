@@ -1,5 +1,6 @@
 const User = require('./user-model');
 const Playlist = require('./playlist-model');
+const Song = require('./song-model');
 const db = require('./init')
 
 // FOR AUTH FUNCTIONS 
@@ -249,6 +250,53 @@ class MongoDatabaseManagerStore {
         }
     }
 
+
+    // Newly added endpoints
+    // Get Song Pairs
+    static async getSongPairs(req) {
+        try {
+            // Find all songs owned by that user
+            const songs = await Song.find({}).sort({ title: 1 });
+            console.log("getSongPairs songs found:", songs.length);
+
+            const songData = songs.map(song => {
+                const songObj = song.toObject();
+                songObj.playlists = song.playlists.length;
+                return songObj;
+            });
+
+            return { success: true, songs: songData };
+
+        } catch (err) {
+            console.error("Error getting song pairs:", err);
+            return { success: false, message: err.message };
+        }
+    }
+
+    static async createSong(req, body) {
+        try {
+            const user = await User.findOne({ _id: req.userId });
+            if (!user) {
+                return { success: false, message: "User not found" };
+            }
+
+            const newSong = new Song({
+                title: body.title,
+                artist: body.artist,
+                year: body.year,
+                youTubeId: body.youTubeId,
+                created_by: user.email,
+                playlists: [],
+                listens: 0
+            });
+
+            const savedSong = await newSong.save();
+            return { success: true, song: savedSong };
+        } catch (err) {
+            console.error("Error creating song:", err);
+            return { success: false, message: err.message };
+        }
+    }
 }
 
 module.exports = {
