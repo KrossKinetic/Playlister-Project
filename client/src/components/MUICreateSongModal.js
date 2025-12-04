@@ -1,10 +1,8 @@
-import { useContext, useState, useEffect } from 'react'
-import GlobalStoreContext from '../store';
-import * as React from 'react';
+import { useState, useEffect } from 'react'
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
-import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
@@ -79,57 +77,36 @@ const buttonStyle = {
     width: '140px'
 };
 
-export default function MUIEditSongModal({ handleConfirmEdit, handleCancelEdit, open, song, error = "" }) {
-    const { store } = useContext(GlobalStoreContext);
-
-    let songData = song;
-    if (typeof song === 'string') {
-        songData = store.songCatalog.find(s => s._id === song);
-    }
-    if (!songData) songData = { title: '', artist: '', year: '', youTubeId: '' };
-
-    const [title, setTitle] = useState(songData.title);
-    const [artist, setArtist] = useState(songData.artist);
-    const [year, setYear] = useState(songData.year);
-    const [youTubeId, setYouTubeId] = useState(songData.youTubeId);
+export default function MUICreateSongModal({ handleConfirmCreate, handleCancelCreate, open, error = "" }) {
+    const [title, setTitle] = useState('');
+    const [artist, setArtist] = useState('');
+    const [year, setYear] = useState('');
+    const [youTubeId, setYouTubeId] = useState('');
 
     useEffect(() => {
         if (open) {
-            let s = song;
-            if (typeof song === 'string') {
-                s = store.songCatalog.find(i => i._id === song);
-            }
-            if (s) {
-                setTitle(s.title);
-                setArtist(s.artist);
-                setYear(s.year);
-                setYouTubeId(s.youTubeId);
-            }
+            setTitle('');
+            setArtist('');
+            setYear('');
+            setYouTubeId('');
         }
-    }, [open, song, store.songCatalog]);
+    }, [open]);
 
-    const hasChanges = () => {
-        if (!songData) return false;
-        return title !== songData.title ||
-            artist !== songData.artist ||
-            year !== songData.year ||
-            youTubeId !== songData.youTubeId;
-    };
 
     const hasEmptyFields = () => {
         return title === "" || artist === "" || year === "" || youTubeId === "";
     };
 
-    const isCompleteDisabled = !hasChanges() || hasEmptyFields();
+    const isCompleteDisabled = hasEmptyFields();
 
     return (
         <Modal
             open={open}
-            onClose={() => handleCancelEdit()}
+            onClose={() => handleCancelCreate()}
         >
             <Box sx={style}>
                 <Box sx={headerStyle}>
-                    Edit Song
+                    Create Song
                 </Box>
                 <Box sx={bodyStyle}>
                     <TextField
@@ -211,7 +188,7 @@ export default function MUIEditSongModal({ handleConfirmEdit, handleCancelEdit, 
                                     bgcolor: isCompleteDisabled ? '#2E7D32' : '#1B5E20',
                                 }
                             }}
-                            onClick={() => handleConfirmEdit(title, artist, year, youTubeId)}
+                            onClick={() => handleConfirmCreate(title, artist, year, youTubeId)}
                             disabled={isCompleteDisabled}
                         >
                             Complete
@@ -225,7 +202,7 @@ export default function MUIEditSongModal({ handleConfirmEdit, handleCancelEdit, 
                                     bgcolor: '#616161',
                                 }
                             }}
-                            onClick={() => handleCancelEdit()}
+                            onClick={() => handleCancelCreate()}
                         >
                             Cancel
                         </Button>

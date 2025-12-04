@@ -167,6 +167,60 @@ createSong = async (req, res) => {
     });
 }
 
+deleteSong = async (req, res) => {
+    if (auth.verifyUser(req) === null) {
+        return res.status(400).json({
+            errorMessage: 'UNAUTHORIZED'
+        })
+    }
+    console.log("deleteSong with id: " + JSON.stringify(req.params.id));
+
+    const response = await DatabaseManager.deleteSong(req);
+
+    if (!response || !response.success) {
+        return res.status(400).json({
+            success: false,
+            errorMessage: response?.message || 'Failed to delete song'
+        });
+    }
+
+    return res.status(200).json({
+        success: true,
+        message: 'Song deleted successfully!'
+    });
+}
+
+updateSong = async (req, res) => {
+    if (auth.verifyUser(req) === null) {
+        return res.status(400).json({
+            errorMessage: 'UNAUTHORIZED'
+        })
+    }
+    const body = req.body;
+    console.log("updateSong: " + JSON.stringify(body));
+
+    if (!body) {
+        return res.status(400).json({
+            success: false,
+            errorMessage: 'You must provide a body to update',
+        })
+    }
+
+    const response = await DatabaseManager.updateSong(req, body);
+
+    if (!response || !response.success) {
+        return res.status(400).json({
+            success: false,
+            errorMessage: response?.message || 'Failed to update song'
+        });
+    }
+
+    return res.status(200).json({
+        success: true,
+        song: response.song
+    });
+}
+
 getPlaylists = async (req, res) => {
     if (auth.verifyUser(req) === null) {
         return res.status(400).json({
@@ -227,5 +281,7 @@ module.exports = {
     getSongPairs,
     getPlaylists,
     updatePlaylist,
-    createSong
+    createSong,
+    deleteSong,
+    updateSong
 }

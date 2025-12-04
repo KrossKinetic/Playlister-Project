@@ -275,6 +275,11 @@ class MongoDatabaseManagerStore {
 
     static async createSong(req, body) {
         try {
+            const oldSong = await Song.findOne({ title: body.title, artist: body.artist, year: body.year });
+            if (oldSong) {
+                return { success: false, message: "Song already exists, choose a different title, artist, or year" };
+            }
+
             const user = await User.findOne({ _id: req.userId });
             if (!user) {
                 return { success: false, message: "User not found" };
@@ -294,6 +299,63 @@ class MongoDatabaseManagerStore {
             return { success: true, song: savedSong };
         } catch (err) {
             console.error("Error creating song:", err);
+            return { success: false, message: err.message };
+        }
+    }
+
+    static async deleteSong(req) {
+        try {
+            const song = await Song.findById(req.params.id);
+            if (!song) {
+                return { success: false, message: "Song not found" };
+            }
+
+            const user = await User.findOne({ _id: req.userId });
+            if (!user) {
+                return { success: false, message: "User not found" };
+            }
+
+            if (song.created_by !== user.email) {
+                return { success: false, message: "Authentication error" };
+            }
+
+            await Song.findByIdAndDelete(req.params.id);
+            return { success: true, message: "Song deleted" };
+        } catch (err) {
+            console.error("Error deleting song:", err);
+            return { success: false, message: err.message };
+        }
+    }
+
+    static async updateSong(req, body) {
+        try {
+            const oldSong = await Song.findOne({ title: body.title, artist: body.artist, year: body.year });
+            if (oldSong) {
+                return { success: false, message: "Song already exists, choose a different title, artist, or year" };
+            }
+            const song = await Song.findById(req.params.id);
+            if (!song) {
+                return { success: false, message: "Song not found" };
+            }
+
+            const user = await User.findOne({ _id: req.userId });
+            if (!user) {
+                return { success: false, message: "User not found" };
+            }
+
+            if (song.created_by !== user.email) {
+                return { success: false, message: "Authentication error" };
+            }
+
+            song.title = body.title;
+            song.artist = body.artist;
+            song.year = body.year;
+            song.youTubeId = body.youTubeId;
+
+            await song.save();
+            return { success: true, song: song };
+        } catch (err) {
+            console.error("Error updating song:", err);
             return { success: false, message: err.message };
         }
     }

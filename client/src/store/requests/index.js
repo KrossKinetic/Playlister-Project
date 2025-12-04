@@ -122,6 +122,34 @@ export async function createSong(title, artist, year, youTubeId) {
     return { data: data, status: res.status, statusText: res.statusText };
 }
 
+export async function deleteSong(id) {
+    const res = await api(`/song/${id}`, {
+        method: 'DELETE'
+    });
+
+    let data = { success: false };
+    try {
+        data = await res.json();
+    } catch (err) { }
+
+    return { data: data, status: res.status, statusText: res.statusText };
+}
+
+export async function updateSong(id, song) {
+    const res = await api(`/song/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(song),
+        headers: { 'Content-Type': 'application/json' }
+    });
+
+    let data = { success: false };
+    try {
+        data = await res.json();
+    } catch (err) { }
+
+    return { data: data, status: res.status, statusText: res.statusText };
+}
+
 export async function updatePlaylistById(id, playlist) {
     const res = await api(`/playlist/${id}`, {
         method: 'PUT',
@@ -144,7 +172,8 @@ const apis = {
     getPlaylistPairs,
     getSongPairs,
     updatePlaylistById,
-    createSong
+    createSong,
+    deleteSong,
+    updateSong
 }
-
 export default apis

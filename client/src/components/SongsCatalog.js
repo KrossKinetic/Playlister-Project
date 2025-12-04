@@ -14,6 +14,11 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import YouTubePlayer from './youtube';
 import Typography from '@mui/material/Typography';
+import Menu from '@mui/material/Menu';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import MUIDeleteSongModal from './MUIDeleteSongModal';
+import MUIEditSongModal from './MUIEditSongModal';
+import MUICreateSongModal from './MUICreateSongModal';
 
 function SongsCatalog() {
     const { store } = useContext(GlobalStoreContext);
@@ -26,13 +31,34 @@ function SongsCatalog() {
     const hasInitialSorted = useRef(false);
     const [isSongPlaying, setIsSongPlaying] = useState(false);
     const [currentSongIndex, setCurrentSongIndex] = useState(0);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const isMenuOpen = Boolean(anchorEl);
+
+    const [currentSong, setCurrentSong] = useState({
+        title: "",
+        artist: "",
+        year: "",
+        youTubeId: "",
+        created_by: "",
+        listens: 0,
+        playlists: 0,
+        _id: ""
+    });
+
+    const [isRemoveSongModalOpen, setIsRemoveSongModalOpen] = useState(false);
+    const [isEditSongModalOpen, setIsEditSongModalOpen] = useState(false);
+    const [isCreateSongModalOpen, setIsCreateSongModalOpen] = useState(false);
+
+    const [EditSongModalError, setEditSongModalError] = useState("");
+    const [CreateSongModalError, setCreateSongModalError] = useState("");
+
 
     useEffect(() => {
         store.loadSongCatalog();
     }, []);
 
     useEffect(() => {
-        if (store.songCatalog.length > 0 && !hasInitialSorted.current) {
+        if (store.songCatalog && (store.songCatalog.length > 0) && (!hasInitialSorted.current)) {
             handleSort("listens-hi-lo");
             hasInitialSorted.current = true;
         }
@@ -77,7 +103,7 @@ function SongsCatalog() {
     const handleSort = (type) => {
         setSortType(type);
         const comparator = getComparator(type);
-        if (comparator) {
+        if (comparator && filteredSongs) {
             const sorted = [...filteredSongs].sort(comparator);
             setFilteredSongs(sorted);
         }
@@ -95,6 +121,7 @@ function SongsCatalog() {
             filtered.sort(comparator);
         }
         setFilteredSongs(filtered);
+        setIsSongPlaying(false);
     };
 
     const handleClear = () => {
@@ -105,6 +132,73 @@ function SongsCatalog() {
         setIsSongPlaying(false);
         setCurrentSongIndex(0);
         setFilteredSongs(store.songCatalog);
+    };
+
+    const handleMenuOpen = (event, song) => {
+        setCurrentSong(song);
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
+
+    const handleMenuCloseAdd = () => {
+        setAnchorEl(null);
+    };
+
+    const handleMenuCloseEdit = () => {
+        setAnchorEl(null);
+        setIsEditSongModalOpen(true);
+    };
+
+    const handleMenuCloseRemove = () => {
+        setAnchorEl(null);
+        setIsRemoveSongModalOpen(true);
+    };
+
+    const handleConfirmRemoveSong = () => {
+        store.removeSong(currentSong._id);
+        setIsRemoveSongModalOpen(false);
+    };
+
+    const handleCancelRemoveSong = () => {
+        setIsRemoveSongModalOpen(false);
+    };
+
+    const handleConfirmEditSong = async (title, artist, year, youTubeId) => {
+        const result = await store.updateSong(currentSong._id, {
+            title: title,
+            artist: artist,
+            year: year,
+            youTubeId: youTubeId
+        });
+        if (result === "success") {
+            setIsEditSongModalOpen(false);
+        } else {
+            setEditSongModalError(result);
+        }
+    };
+
+    const handleCancelEditSong = () => {
+        setIsEditSongModalOpen(false);
+    };
+
+    const handleCreateNewSong = () => {
+        setIsCreateSongModalOpen(true);
+    };
+
+    const handleCreateNewSongSubmit = async (title, artist, year, youTubeId) => {
+        const result = await store.createNewSong(title, artist, year, youTubeId);
+        if (result === "success") {
+            setIsCreateSongModalOpen(false);
+        } else {
+            setCreateSongModalError(result);
+        }
+    };
+
+    const handleCancelCreateSong = () => {
+        setIsCreateSongModalOpen(false);
     };
 
     return (
@@ -248,16 +342,19 @@ function SongsCatalog() {
                             <MenuItem value="year-lo-hi">Year (Low-High)</MenuItem>
                         </Select>
                     </FormControl>
-                    <Typography variant="h6" sx={{ m: 1 }}>
-                        {filteredSongs.length} Songs
-                    </Typography>
+                    {
+                        filteredSongs && (
+                            <Typography variant="h6" sx={{ m: 1 }}>
+                                {filteredSongs.length} Songs
+                            </Typography>
+                        )
+                    }
                 </Box>
                 <Box sx={{ overflowY: 'auto', flexGrow: 1 }}>
                     {
-                        filteredSongs.map((song) => (
+                        filteredSongs && (filteredSongs.map((song) => (
                             <Box
                                 key={song._id}
-                                onClick={() => handleSongClick(song)}
                                 sx={{
                                     p: 2,
                                     mb: 2,
@@ -270,38 +367,110 @@ function SongsCatalog() {
                                 }}
                             >
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                                    <Box sx={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
+                                    <Box onClick={() => handleSongClick(song)} sx={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
                                         {song.title} by {song.artist} ({song.year})
                                     </Box>
-                                    {/* Placeholder for menu icon if needed, or just empty for now as per image showing dots */}
-                                    <Box sx={{ cursor: 'pointer' }}>&#8942;</Box>
+                                    {
+                                        auth.loggedIn && (auth.guestLoggedIn === false) && (
+                                            <Box sx={{ cursor: 'pointer' }}
+                                                onClick={(event) => handleMenuOpen(event, song)}
+                                            >
+                                                <MoreVertIcon />
+                                            </Box>
+                                        )
+                                    }
                                 </Box>
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
                                     <Box>Listens: {song.listens.toLocaleString()}</Box>
                                     <Box>Playlists: {song.playlists}</Box>
                                 </Box>
                             </Box>
-                        ))
+                        )))
                     }
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'start', pb: 3, pt: 2 }}>
-                    <Button
-                        variant="contained"
-                        sx={{
-                            borderRadius: 5,
-                            bgcolor: '#6a5acd',
-                            color: 'white',
-                            textTransform: 'none',
-                            fontSize: '1.1rem',
-                            px: 4,
-                            '&:hover': { bgcolor: '#483d8b' }
-                        }}
-                        onClick={() => store.createNewSong()}
-                    >
-                        New Song
-                    </Button>
+                    {
+                        auth.loggedIn && (auth.guestLoggedIn === false) && (
+                            <Button
+                                variant="contained"
+                                sx={{
+                                    borderRadius: 5,
+                                    bgcolor: '#6a5acd',
+                                    color: 'white',
+                                    textTransform: 'none',
+                                    fontSize: '1.1rem',
+                                    px: 4,
+                                    '&:hover': { bgcolor: '#483d8b' }
+                                }}
+                                onClick={() => handleCreateNewSong()}
+                            >
+                                New Song
+                            </Button>)
+                    }
                 </Box>
             </Box>
+            {
+                <Menu
+                    anchorEl={anchorEl}
+                    anchorOrigin={{
+                        vertical: 'top',
+                        horizontal: 'right',
+                    }}
+                    keepMounted
+                    transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'right',
+                    }}
+                    open={isMenuOpen}
+                    onClose={handleMenuClose}
+                >
+                    {
+                        auth.loggedIn && (auth.guestLoggedIn === false) && (
+                            <MenuItem onClick={handleMenuCloseAdd}>Add to Playlist</MenuItem>
+                        )
+                    }
+                    {
+                        auth.loggedIn && (auth.user.email === currentSong.created_by) && (
+                            <MenuItem onClick={handleMenuCloseEdit}>Edit Song</MenuItem>
+                        )
+                    }
+                    {
+                        auth.loggedIn && (auth.user.email === currentSong.created_by) && (
+                            <MenuItem onClick={handleMenuCloseRemove}>Remove from Catalog</MenuItem>
+                        )
+                    }
+                </Menu>
+            }
+            {
+                isRemoveSongModalOpen && (
+                    <MUIDeleteSongModal
+                        handleConfirmRemoveSong={handleConfirmRemoveSong}
+                        handleCancelRemoveSong={handleCancelRemoveSong}
+                        open={isRemoveSongModalOpen}
+                    />
+                )
+            }
+            {
+                isEditSongModalOpen && (
+                    <MUIEditSongModal
+                        handleConfirmEdit={handleConfirmEditSong}
+                        handleCancelEdit={handleCancelEditSong}
+                        open={isEditSongModalOpen}
+                        song={currentSong}
+                        error={EditSongModalError}
+                    />
+                )
+            }
+            {
+                isCreateSongModalOpen && (
+                    <MUICreateSongModal
+                        handleConfirmCreate={handleCreateNewSongSubmit}
+                        handleCancelCreate={handleCancelCreateSong}
+                        open={isCreateSongModalOpen}
+                        error={CreateSongModalError}
+                    />
+                )
+            }
         </Box>
     );
 }

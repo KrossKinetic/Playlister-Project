@@ -43,13 +43,9 @@ export default function AppBanner() {
         setAnchorEl(null);
     };
 
-    const handleGuestMenu = () => {
-        handleMenuClose();
-        auth.logoutGuest();
-    }
-
     const handleLogout = () => {
         handleMenuClose();
+        history.push("/");
         auth.logoutUser();
     }
 
@@ -129,8 +125,8 @@ export default function AppBanner() {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            <MenuItem onClick={handleGuestMenu}><Link to='/login/'>Login</Link></MenuItem>
-            <MenuItem onClick={handleGuestMenu}><Link to='/register/'>Create Account</Link></MenuItem>
+            <MenuItem onClick={handleLogout}><Link to='/login/'>Login</Link></MenuItem>
+            <MenuItem onClick={handleLogout}><Link to='/register/'>Create Account</Link></MenuItem>
         </Menu>
     let menu = loggedOutMenu;
     if (auth.loggedIn) {
@@ -142,7 +138,6 @@ export default function AppBanner() {
 
     function getAccountMenu(loggedIn) {
         let userAvatar = auth.getUserAvatar();
-        console.log("userAvatar: " + userAvatar);
         if (loggedIn)
             return <Avatar src={userAvatar} sx={{ m: 1, bgcolor: 'secondary.main', width: 50, height: 50 }}></Avatar>
         else
@@ -162,10 +157,8 @@ export default function AppBanner() {
                         {
                             auth.guestLoggedIn ? (
                                 <Link onClick={handleHouseClickGuest} style={{ textDecoration: 'none', color: 'white' }} to='/'><HomeIcon /></Link>
-                            ) : auth.loggedIn ? (
-                                <Link onClick={handleHouseClick} style={{ textDecoration: 'none', color: 'white' }} to='/playlists'><HomeIcon /></Link>
                             ) : (
-                                <Link onClick={handleHouseClick} style={{ textDecoration: 'none', color: 'white' }} to='/'><HomeIcon /></Link>
+                                <Link onClick={handleHouseClick} style={{ textDecoration: 'none', color: 'white' }} to='/playlists'><HomeIcon /></Link>
                             )
                         }
                         {
