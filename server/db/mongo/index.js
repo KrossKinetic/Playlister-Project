@@ -113,6 +113,10 @@ class MongoDatabaseManagerStore {
                 return { success: false, message: "Authentication error" };
             }
 
+            // Remove this playlist from the playlists array of all songs that contain it
+            await Song.updateMany({ playlists: req.params.id }, { $pull: { playlists: req.params.id } });
+            console.log("Playlist reference removed from associated songs");
+
             // Delete the playlist
             await Playlist.findOneAndDelete({ _id: req.params.id });
             console.log("Playlist deleted successfully!");
@@ -174,11 +178,31 @@ class MongoDatabaseManagerStore {
         try {
             const playlists = (await Playlist.find({}).sort({ name: 1 })).map(p => p.toObject());
 
+            let playlist_hash = {};
+            for (let i = 0; i < playlists.length; i++) {
+                playlist_hash[playlists[i]._id] = playlists[i];
+                playlist_hash[playlists[i]._id].songs = [];
+            }
+
             if (!playlists.length) {
                 return { success: false, message: "Playlists not found" };
             }
 
-            return { success: true, data: playlists };
+            const songs = await Song.find({});
+
+            for (let i = 0; i < songs.length; i++) {
+                let song = songs[i];
+                let playlists_from_songs = song.playlists;
+                for (let j = 0; j < playlists_from_songs.length; j++) {
+                    let playlist = playlists_from_songs[j];
+                    if (playlist_hash[playlist]) {
+                        playlist_hash[playlist].songs.push(song);
+                    }
+                }
+            }
+
+            // easier to send as array
+            return { success: true, data: Object.values(playlist_hash) };
         } catch (err) {
             console.error("Error fetching playlists:", err);
             return { success: false, message: err.message };

@@ -49,6 +49,11 @@ export default function AppBanner() {
         auth.logoutUser();
     }
 
+    const handleLogoutGuest = () => {
+        handleMenuClose();
+        auth.logoutUser();
+    }
+
     const handleEditAccount = () => {
         handleMenuClose();
     }
@@ -125,8 +130,8 @@ export default function AppBanner() {
             open={isMenuOpen}
             onClose={handleMenuClose}
         >
-            <MenuItem onClick={handleLogout}><Link to='/login/'>Login</Link></MenuItem>
-            <MenuItem onClick={handleLogout}><Link to='/register/'>Create Account</Link></MenuItem>
+            <MenuItem onClick={handleLogoutGuest}><Link to='/login/'>Login</Link></MenuItem>
+            <MenuItem onClick={handleLogoutGuest}><Link to='/register/'>Create Account</Link></MenuItem>
         </Menu>
     let menu = loggedOutMenu;
     if (auth.loggedIn) {
@@ -157,8 +162,10 @@ export default function AppBanner() {
                         {
                             auth.guestLoggedIn ? (
                                 <Link onClick={handleHouseClickGuest} style={{ textDecoration: 'none', color: 'white' }} to='/'><HomeIcon /></Link>
-                            ) : (
+                            ) : auth.loggedIn ? (
                                 <Link onClick={handleHouseClick} style={{ textDecoration: 'none', color: 'white' }} to='/playlists'><HomeIcon /></Link>
+                            ) : (
+                                <Link onClick={handleHouseClick} style={{ textDecoration: 'none', color: 'white' }} to='/'><HomeIcon /></Link>
                             )
                         }
                         {
