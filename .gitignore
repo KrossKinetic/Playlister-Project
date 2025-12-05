@@ -2,3 +2,4 @@ client/node_modules
 server/node_modules
 server/.env
 .github
+state_persistence_logic.md

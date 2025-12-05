@@ -5,31 +5,71 @@ import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
 
-const style1 = {
+const style = {
     position: 'absolute',
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: 345,
-    height: 250,
-    backgroundSize: "contain",
-    backgroundImage: `url(https://i.insider.com/602ee9ced3ad27001837f2ac?})`,
-    border: '3px solid #000',
-    padding: '20px',
-    boxShadow: 24,
+    width: 400,
+    bgcolor: '#f0f0f0',
+    border: 'none',
+    borderRadius: '16px',
+    boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.2)',
+    p: 0,
+    overflow: 'hidden'
 };
 
-export default function MUIDeleteModal() {
+const headerStyle = {
+    bgcolor: '#2E7D32', // Darker green for header to match SongModal
+    color: 'white',
+    p: 3,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: '1.8rem',
+    borderBottom: '1px solid #ddd'
+};
+
+const bodyStyle = {
+    p: 4,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 3,
+    bgcolor: '#ffffff',
+    textAlign: 'center'
+};
+
+const buttonStyle = {
+    bgcolor: '#2E7D32',
+    color: 'white',
+    fontWeight: 'bold',
+    borderRadius: '8px',
+    padding: '10px 20px',
+    textTransform: 'none',
+    fontSize: '1rem',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    '&:hover': {
+        bgcolor: '#1B5E20',
+    },
+    width: '140px',
+    mx: 2
+};
+
+export default function MUIDeleteModal({ onConfirm }) {
     const { store } = useContext(GlobalStoreContext);
     let name = "";
     if (store.listMarkedForDeletion) {
         name = store.listMarkedForDeletion.name;
     }
+
     function handleDeleteList(event) {
-        store.deleteMarkedList();
+        if (onConfirm) {
+            onConfirm();
+        } else {
+            store.deleteMarkedList();
+        }
     }
+
     function handleCloseModal(event) {
         store.hideModals();
     }
@@ -37,21 +77,44 @@ export default function MUIDeleteModal() {
     return (
         <Modal
             open={store.listMarkedForDeletion !== null}
+            onClose={handleCloseModal}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
         >
-            <Box sx={style1}>
-                <Typography sx={{ fontWeight: 'bold' }} id="modal-modal-title" variant="h4" component="h2">
-                    Delete Playlist
-                </Typography>
-                <Divider sx={{ borderBottomWidth: 5, p: '5px', transform: 'translate(-5.5%, 0%)', width: 377 }} />
-                <Box sx={{ background: "rgb(172,79,198,0.05)" }}>
-                    <Typography id="modal-modal-description" variant="h6" sx={{ color: "#301974", fontWeight: 'bold', mt: 1 }}>
-                        Are you sure you want to delete the <Typography display="inline" id="modal-modal-description" variant="h6" sx={{ color: "#820747CF", fontWeight: 'bold', mt: 2, textDecoration: 'underline' }}>{name}</Typography> playlist?
-                    </Typography>
+            <Box sx={style}>
+                <Box sx={headerStyle}>
+                    Delete Playlist?
                 </Box>
-                <Button sx={{ opacity: 0.7, color: "#8932CC", backgroundColor: "#CBC3E3", fontSize: 13, fontWeight: 'bold', border: 2, borderRadius: 2, p: "5px", mt: "60px", mr: "95px" }} variant="outlined" onClick={handleDeleteList}> Confirm </Button>
-                <Button sx={{ opacity: 0.50, color: "#8932CC", backgroundColor: "#CBC3E3", fontSize: 13, fontWeight: 'bold', border: 2, borderRadius: 2, p: "5px", mt: "60px", ml: "102px" }} variant="outlined" onClick={handleCloseModal}> Cancel </Button>
+                <Box sx={bodyStyle}>
+                    <Typography variant="h5" component="div" sx={{ mb: 2, color: '#333' }}>
+                        Are you sure you want to delete the <b>{name}</b> playlist?
+                    </Typography>
+                    <Typography variant="body1" sx={{ mb: 4, color: '#333', fontWeight: 'bold' }}>
+                        This action cannot be undone.
+                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <Button
+                            variant="contained"
+                            sx={buttonStyle}
+                            onClick={handleDeleteList}
+                        >
+                            Confirm
+                        </Button>
+                        <Button
+                            variant="contained"
+                            sx={{
+                                ...buttonStyle,
+                                bgcolor: '#757575',
+                                '&:hover': {
+                                    bgcolor: '#616161',
+                                }
+                            }}
+                            onClick={handleCloseModal}
+                        >
+                            Cancel
+                        </Button>
+                    </Box>
+                </Box>
             </Box>
         </Modal>
     );

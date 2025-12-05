@@ -17,6 +17,7 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
+import MUIDeleteModal from './MUIDeleteModal';
 
 function PlaylistsScreen() {
     const { store } = useContext(GlobalStoreContext);
@@ -33,28 +34,48 @@ function PlaylistsScreen() {
     const [sortType, setSortType] = useState("listens-hi-lo");
     const hasInitialSorted = useRef(false);
 
+    // State Persistence
+    const [wasModalOpen, setWasModalOpen] = useState(false);
+    const [isUserFilterActive, setIsUserFilterActive] = useState(false);
+
     useEffect(() => {
         store.loadPlaylists();
     }, []);
 
     useEffect(() => {
-        if (store.playlists) {
-            let initialList;
-
-            if (auth.loggedIn && auth.guestLoggedIn === false) {
-                initialList = store.playlists.filter(p => (p.ownerEmail === auth.user.email));
-            } else {
-                initialList = store.playlists;
-            }
-
-            if (!hasInitialSorted.current && initialList.length > 0) {
-                const comparator = getComparator("listens-hi-lo");
-                if (comparator) {
-                    initialList.sort(comparator);
+        if (!wasModalOpen) {
+            if (store.playlists) {
+                if (auth.loggedIn && auth.guestLoggedIn === false) {
+                    let initialList = store.playlists.filter(p => (p.ownerEmail === auth.user.email));
+                    if (!hasInitialSorted.current && initialList.length > 0) {
+                        const comparator = getComparator("listens-hi-lo");
+                        if (comparator) initialList.sort(comparator);
+                        hasInitialSorted.current = true;
+                    }
+                    setFilteredPlaylists(initialList);
+                    setIsUserFilterActive(true);
+                } else {
+                    setFilteredPlaylists(store.playlists);
+                    setIsUserFilterActive(false);
                 }
-                hasInitialSorted.current = true;
             }
-            setFilteredPlaylists(initialList);
+        } else {
+            setWasModalOpen(false); // Reset flag
+            if (store.playlists) {
+                if (isUserFilterActive) {
+                    // Restore "My Items" filter
+                    let userItems = store.playlists.filter(p => (p.ownerEmail === auth.user.email));
+
+                    const comparator = getComparator(sortType);
+                    if (comparator) userItems.sort(comparator);
+
+                    setFilteredPlaylists(userItems);
+                } else {
+                    // Restore "Search/All" filter by re-running search
+                    setFilteredPlaylists(store.playlists); // Base reset
+                    handleSearch(); // Applies current search text
+                }
+            }
         }
     }, [store.playlists]);
 
@@ -63,6 +84,21 @@ function PlaylistsScreen() {
             ...prev,
             [id]: !prev[id]
         }));
+    };
+
+    const handleCreateNewPlaylist = () => {
+        store.createNewList();
+        setWasModalOpen(true);
+    };
+
+    const handleDeletePlaylist = (id, event) => {
+        event.stopPropagation();
+        store.markListForDeletion(id);
+    };
+
+    const handleConfirmDelete = () => {
+        store.deleteMarkedList();
+        setWasModalOpen(true);
     };
 
     const getComparator = (type) => {
@@ -102,6 +138,7 @@ function PlaylistsScreen() {
             filtered.sort(comparator);
         }
         setFilteredPlaylists(filtered);
+        setIsUserFilterActive(false);
     };
 
     const handleClear = () => {
@@ -113,13 +150,14 @@ function PlaylistsScreen() {
         setSortType("listens-hi-lo");
 
         let defaultList;
-
         if (auth.loggedIn && auth.guestLoggedIn === false) {
             defaultList = store.playlists.filter(p => (p.ownerEmail === auth.user.email));
+            setIsUserFilterActive(true);
         } else {
             defaultList = store.playlists;
+            setIsUserFilterActive(false);
         }
-        const comparator = getComparator(sortType);
+        const comparator = getComparator("listens-hi-lo");
         if (comparator) {
             defaultList.sort(comparator);
         }
@@ -223,20 +261,73 @@ function PlaylistsScreen() {
                                         boxShadow: '0px 4px 6px rgba(0,0,0,0.1)'
                                     }}
                                 >
-                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                        <Avatar
-                                            src={playlist.avatarPng}
-                                            sx={{ width: 80, height: 80, mr: 2, border: '1px solid #ccc' }}
-                                        />
-                                        <Box>
-                                            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{playlist.name}</Typography>
-                                            <Typography variant="body2" color="text.secondary">{playlist?.username ?? "Username"}</Typography>
-                                            <Typography variant="body2" sx={{ fontWeight: 'bold', }} color="text.secondary">
-                                                {playlist.listens} Listeners
-                                            </Typography>
-                                            <Typography variant="body2" sx={{ fontWeight: 'bold', }} color="text.secondary">
-                                                {playlist.songs.length} Songs
-                                            </Typography>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                                            <Avatar
+                                                src={playlist.avatarPng}
+                                                sx={{ width: 80, height: 80, mr: 2, border: '1px solid #ccc' }}
+                                            />
+                                            <Box>
+                                                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{playlist.name}</Typography>
+                                                <Typography variant="body2" color="text.secondary">{playlist?.username ?? "Username"}</Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 'bold', }} color="text.secondary">
+                                                    {playlist.listens} Listeners
+                                                </Typography>
+                                                <Typography variant="body2" sx={{ fontWeight: 'bold', }} color="text.secondary">
+                                                    {playlist.songs.length} Songs
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+
+                                        {/* Action Buttons */}
+                                        <Box sx={{ display: 'flex', gap: 1 }}>
+                                            {
+                                                playlist.ownerEmail === auth.user.email && (
+                                                    <>
+                                                        <Button
+                                                            variant="contained"
+                                                            onClick={(e) => handleDeletePlaylist(playlist._id, e)}
+                                                            sx={{
+                                                                bgcolor: '#d32f2f', color: 'white', textTransform: 'none', borderRadius: 2,
+                                                                minWidth: '60px', height: '30px', fontSize: '0.8rem',
+                                                                '&:hover': { bgcolor: '#b71c1c' }
+                                                            }}
+                                                        >
+                                                            Delete
+                                                        </Button>
+                                                        <Button
+                                                            variant="contained"
+                                                            sx={{
+                                                                bgcolor: '#1976d2', color: 'white', textTransform: 'none', borderRadius: 2,
+                                                                minWidth: '50px', height: '30px', fontSize: '0.8rem',
+                                                                '&:hover': { bgcolor: '#1565c0' }
+                                                            }}
+                                                        >
+                                                            Edit
+                                                        </Button>
+                                                    </>
+                                                )
+                                            }
+                                            <Button
+                                                variant="contained"
+                                                sx={{
+                                                    bgcolor: '#388e3c', color: 'white', textTransform: 'none', borderRadius: 2,
+                                                    minWidth: '50px', height: '30px', fontSize: '0.8rem',
+                                                    '&:hover': { bgcolor: '#2e7d32' }
+                                                }}
+                                            >
+                                                Copy
+                                            </Button>
+                                            <Button
+                                                variant="contained"
+                                                sx={{
+                                                    bgcolor: '#e040fb', color: 'white', textTransform: 'none', borderRadius: 2,
+                                                    minWidth: '50px', height: '30px', fontSize: '0.8rem',
+                                                    '&:hover': { bgcolor: '#d500f9' }
+                                                }}
+                                            >
+                                                Play
+                                            </Button>
                                         </Box>
                                     </Box>
 
@@ -264,7 +355,28 @@ function PlaylistsScreen() {
                         ))
                     }
                 </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'start', pb: 3, pt: 2 }}>
+                    {
+                        auth.loggedIn && (auth.guestLoggedIn === false) && (
+                            <Button
+                                variant="contained"
+                                sx={{
+                                    borderRadius: 5,
+                                    bgcolor: '#6a5acd',
+                                    color: 'white',
+                                    textTransform: 'none',
+                                    fontSize: '1.1rem',
+                                    px: 4,
+                                    '&:hover': { bgcolor: '#483d8b' }
+                                }}
+                                onClick={handleCreateNewPlaylist}
+                            >
+                                New Playlist
+                            </Button>)
+                    }
+                </Box>
             </Box>
+            <MUIDeleteModal onConfirm={handleConfirmDelete} />
         </Box>
     );
 }

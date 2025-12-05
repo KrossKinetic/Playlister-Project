@@ -87,7 +87,9 @@ function GlobalStoreContextProvider(props) {
                     newListCounter: store.newListCounter,
                     listNameActive: false,
                     listIdMarkedForDeletion: null,
-                    listMarkedForDeletion: null
+                    listMarkedForDeletion: null,
+                    songCatalog: store.songCatalog,
+                    playlists: store.playlists
                 });
             }
             // STOP EDITING THE CURRENT LIST
@@ -101,7 +103,9 @@ function GlobalStoreContextProvider(props) {
                     newListCounter: store.newListCounter,
                     listNameActive: false,
                     listIdMarkedForDeletion: null,
-                    listMarkedForDeletion: null
+                    listMarkedForDeletion: null,
+                    songCatalog: store.songCatalog,
+                    playlists: store.playlists
                 })
             }
             // CREATE A NEW LIST
@@ -115,7 +119,9 @@ function GlobalStoreContextProvider(props) {
                     newListCounter: store.newListCounter + 1,
                     listNameActive: false,
                     listIdMarkedForDeletion: null,
-                    listMarkedForDeletion: null
+                    listMarkedForDeletion: null,
+                    songCatalog: store.songCatalog,
+                    playlists: store.playlists
                 })
             }
             // GET ALL THE LISTS SO WE CAN PRESENT THEM
@@ -129,7 +135,9 @@ function GlobalStoreContextProvider(props) {
                     newListCounter: store.newListCounter,
                     listNameActive: false,
                     listIdMarkedForDeletion: null,
-                    listMarkedForDeletion: null
+                    listMarkedForDeletion: null,
+                    songCatalog: store.songCatalog,
+                    playlists: store.playlists
                 });
             }
             // PREPARE TO DELETE A LIST
@@ -143,7 +151,9 @@ function GlobalStoreContextProvider(props) {
                     newListCounter: store.newListCounter,
                     listNameActive: false,
                     listIdMarkedForDeletion: payload.id,
-                    listMarkedForDeletion: payload.playlist
+                    listMarkedForDeletion: payload.playlist,
+                    songCatalog: store.songCatalog,
+                    playlists: store.playlists
                 });
             }
             // UPDATE A LIST
@@ -157,7 +167,9 @@ function GlobalStoreContextProvider(props) {
                     newListCounter: store.newListCounter,
                     listNameActive: false,
                     listIdMarkedForDeletion: null,
-                    listMarkedForDeletion: null
+                    listMarkedForDeletion: null,
+                    songCatalog: store.songCatalog,
+                    playlists: store.playlists
                 });
             }
             // START EDITING A LIST NAME
@@ -171,7 +183,9 @@ function GlobalStoreContextProvider(props) {
                     newListCounter: store.newListCounter,
                     listNameActive: true,
                     listIdMarkedForDeletion: null,
-                    listMarkedForDeletion: null
+                    listMarkedForDeletion: null,
+                    songCatalog: store.songCatalog,
+                    playlists: store.playlists
                 });
             }
             // 
@@ -186,7 +200,8 @@ function GlobalStoreContextProvider(props) {
                     listNameActive: false,
                     listIdMarkedForDeletion: null,
                     listMarkedForDeletion: null,
-                    songCatalog: payload
+                    songCatalog: payload,
+                    playlists: store.playlists
                 });
             }
             case GlobalStoreActionType.REMOVE_SONG: {
@@ -200,7 +215,8 @@ function GlobalStoreContextProvider(props) {
                     listNameActive: false,
                     listIdMarkedForDeletion: null,
                     listMarkedForDeletion: null,
-                    songCatalog: payload
+                    songCatalog: payload,
+                    playlists: store.playlists
                 });
             }
             case GlobalStoreActionType.HIDE_MODALS: {
@@ -213,7 +229,9 @@ function GlobalStoreContextProvider(props) {
                     newListCounter: store.newListCounter,
                     listNameActive: false,
                     listIdMarkedForDeletion: null,
-                    listMarkedForDeletion: null
+                    listMarkedForDeletion: null,
+                    songCatalog: store.songCatalog,
+                    playlists: store.playlists
                 });
             }
             case GlobalStoreActionType.LOAD_SONG_CATALOG: {
@@ -227,7 +245,8 @@ function GlobalStoreContextProvider(props) {
                     listNameActive: false,
                     listIdMarkedForDeletion: null,
                     listMarkedForDeletion: null,
-                    songCatalog: payload
+                    songCatalog: payload,
+                    playlists: store.playlists
                 });
             }
             case GlobalStoreActionType.LOAD_PLAYLISTS: {
@@ -324,20 +343,40 @@ function GlobalStoreContextProvider(props) {
 
     // THIS FUNCTION CREATES A NEW LIST
     store.createNewList = async function () {
-        let newListName = "Untitled" + store.newListCounter;
-        const response = await storeRequestSender.createPlaylist(newListName, [], auth.user.email);
+        let newListName = "Untitled 0";
+        if (store.playlists) {
+            let userPlaylists = store.playlists.filter(p => p.ownerEmail === auth.user.email);
+            let pattern = /^Untitled (\d+)$/;
+            let numbers = userPlaylists
+                .map(p => {
+                    let match = p.name.match(pattern);
+                    return match ? parseInt(match[1]) : -1;
+                })
+                .filter(n => n >= 0)
+                .sort((a, b) => a - b);
+
+            let nextNumber = 0;
+            for (let i = 0; i < numbers.length; i++) {
+                if (numbers[i] > nextNumber) {
+                    break;
+                }
+                if (numbers[i] === nextNumber) {
+                    nextNumber++;
+                }
+            }
+            newListName = "Untitled " + nextNumber;
+        }
+
+        const response = await storeRequestSender.createPlaylist(newListName, 0, auth.user.email);
         console.log("createNewList response: " + response);
         if (response.status === 201) {
             tps.clearAllTransactions();
             let newList = response.data.playlist;
+            store.loadPlaylists();
             storeReducer({
                 type: GlobalStoreActionType.CREATE_NEW_LIST,
                 payload: newList
-            }
-            );
-
-            // IF IT'S A VALID LIST THEN LET'S START EDITING IT
-            history.push("/playlist/" + newList._id);
+            });
         }
         else {
             console.log("FAILED TO CREATE A NEW LIST");
@@ -395,6 +434,7 @@ function GlobalStoreContextProvider(props) {
     store.deleteList = async function (id) {
         let response = await storeRequestSender.deletePlaylistById(id);
         store.loadIdNamePairs();
+        store.loadPlaylists();
         if (response.data.success) {
             history.push("/");
         }
