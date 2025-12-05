@@ -201,8 +201,17 @@ class MongoDatabaseManagerStore {
                 }
             }
 
-            // easier to send as array
-            return { success: true, data: Object.values(playlist_hash) };
+            let playlist_array = Object.values(playlist_hash);
+
+            // note to self: We use promile.all because that allows to wait for all the promises to resolve
+            playlist_array = await Promise.all(playlist_array.map(async p => {
+                const user = await User.findOne({ email: p.ownerEmail });
+                p.avatarPng = user?.avatarPng ?? "";
+                p.username = user?.username ?? "";
+                return p;
+            }));
+
+            return { success: true, data: playlist_array };
         } catch (err) {
             console.error("Error fetching playlists:", err);
             return { success: false, message: err.message };

@@ -358,7 +358,7 @@ function SongsCatalog() {
                                 sx={{
                                     p: 2,
                                     mb: 2,
-                                    border: song.created_by === auth.user.email ? '2px solid red' : '1px solid #000',
+                                    border: song.created_by === auth.user.email ? '2px solid #990000' : '1px solid #000',
                                     borderRadius: 2,
                                     bgcolor: '#ffecb3',
                                     display: 'flex',
