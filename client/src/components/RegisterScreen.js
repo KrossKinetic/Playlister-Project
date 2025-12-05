@@ -1,6 +1,5 @@
 import { useContext, useState, useRef } from 'react'; // Import useState and useRef
 import AuthContext from '../auth'
-import MUIErrorModal from './MUIErrorModal'
 import Copyright from './Copyright'
 
 import Avatar from '@mui/material/Avatar';

@@ -1,6 +1,5 @@
 import { useContext, useState, useRef } from 'react';
 import AuthContext from '../auth'
-import MUIErrorModal from './MUIErrorModal'
 import Copyright from './Copyright'
 
 import Avatar from '@mui/material/Avatar';
@@ -109,11 +108,6 @@ export default function EditAccount() {
 
     console.log("hasChanges: ", hasChanges);
     console.log("isFormValid: ", isFormValid);
-
-    let modalJSX = "";
-    if (auth.errorMessage !== null) {
-        modalJSX = <MUIErrorModal />;
-    }
 
     return (
         <Container component="main" maxWidth="xs">
@@ -233,7 +227,6 @@ export default function EditAccount() {
                 </Box>
             </Box>
             <Copyright sx={{ mt: 5 }} />
-            {modalJSX}
         </Container >
     );
 }

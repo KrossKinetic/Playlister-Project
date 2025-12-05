@@ -1,6 +1,5 @@
 import { useContext, useState, useEffect } from 'react'
 import GlobalStoreContext from '../store';
-import * as React from 'react';
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
 import Typography from '@mui/material/Typography';
