@@ -18,6 +18,7 @@ import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import MUIDeleteModal from './MUIDeleteModal';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 
 function PlaylistsScreen() {
     const { store } = useContext(GlobalStoreContext);
@@ -308,16 +309,20 @@ function PlaylistsScreen() {
                                                     </>
                                                 )
                                             }
-                                            <Button
-                                                variant="contained"
-                                                sx={{
-                                                    bgcolor: '#388e3c', color: 'white', textTransform: 'none', borderRadius: 2,
-                                                    minWidth: '50px', height: '30px', fontSize: '0.8rem',
-                                                    '&:hover': { bgcolor: '#2e7d32' }
-                                                }}
-                                            >
-                                                Copy
-                                            </Button>
+                                            {
+                                                !auth.guestLoggedIn && (
+                                                    <Button
+                                                        variant="contained"
+                                                        sx={{
+                                                            bgcolor: '#388e3c', color: 'white', textTransform: 'none', borderRadius: 2,
+                                                            minWidth: '50px', height: '30px', fontSize: '0.8rem',
+                                                            '&:hover': { bgcolor: '#2e7d32' }
+                                                        }}
+                                                    >
+                                                        Copy
+                                                    </Button>
+                                                )
+                                            }
                                             <Button
                                                 variant="contained"
                                                 sx={{
@@ -360,6 +365,7 @@ function PlaylistsScreen() {
                         auth.loggedIn && (auth.guestLoggedIn === false) && (
                             <Button
                                 variant="contained"
+                                startIcon={<AddCircleIcon />}
                                 sx={{
                                     borderRadius: 5,
                                     bgcolor: '#6a5acd',
