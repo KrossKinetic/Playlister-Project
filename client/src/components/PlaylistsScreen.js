@@ -19,6 +19,7 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import MUIDeleteModal from './MUIDeleteModal';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
+import MUIPlayPlaylistModal from './MUIPlayPlaylistModal';
 
 function PlaylistsScreen() {
     const { store } = useContext(GlobalStoreContext);
@@ -38,6 +39,9 @@ function PlaylistsScreen() {
     // State Persistence
     const [wasModalOpen, setWasModalOpen] = useState(false);
     const [isUserFilterActive, setIsUserFilterActive] = useState(false);
+
+    // Play Playlist Modal State
+    const [playingPlaylist, setPlayingPlaylist] = useState(null);
 
     useEffect(() => {
         store.loadPlaylists();
@@ -61,10 +65,9 @@ function PlaylistsScreen() {
                 }
             }
         } else {
-            setWasModalOpen(false); // Reset flag
+            setWasModalOpen(false);
             if (store.playlists) {
                 if (isUserFilterActive) {
-                    // Restore "My Items" filter
                     let userItems = store.playlists.filter(p => (p.ownerEmail === auth.user.email));
 
                     const comparator = getComparator(sortType);
@@ -72,9 +75,8 @@ function PlaylistsScreen() {
 
                     setFilteredPlaylists(userItems);
                 } else {
-                    // Restore "Search/All" filter by re-running search
-                    setFilteredPlaylists(store.playlists); // Base reset
-                    handleSearch(); // Applies current search text
+                    setFilteredPlaylists(store.playlists);
+                    handleSearch();
                 }
             }
         }
@@ -102,6 +104,14 @@ function PlaylistsScreen() {
         setWasModalOpen(true);
     };
 
+    const handlePlayPlaylist = (playlist) => {
+        setPlayingPlaylist(playlist);
+    };
+
+    const handleClosePlayModal = () => {
+        setPlayingPlaylist(null);
+    };
+
     const getComparator = (type) => {
         switch (type) {
             case "listens-hi-lo": return (a, b) => b.listens - a.listens;
@@ -124,6 +134,7 @@ function PlaylistsScreen() {
     };
 
     const handleSearch = () => {
+        if (!store.playlists) return;
         const filtered = store.playlists.filter(p => {
             const nameMatch = p.name.toLowerCase().includes(searchPlaylistName.toLowerCase());
             const userMatch = (p.username || "").toLowerCase().includes(searchUserName.toLowerCase());
@@ -155,7 +166,7 @@ function PlaylistsScreen() {
             defaultList = store.playlists.filter(p => (p.ownerEmail === auth.user.email));
             setIsUserFilterActive(true);
         } else {
-            defaultList = store.playlists;
+            defaultList = [...store.playlists];
             setIsUserFilterActive(false);
         }
         const comparator = getComparator("listens-hi-lo");
@@ -325,6 +336,7 @@ function PlaylistsScreen() {
                                             }
                                             <Button
                                                 variant="contained"
+                                                onClick={() => handlePlayPlaylist(playlist)}
                                                 sx={{
                                                     bgcolor: '#e040fb', color: 'white', textTransform: 'none', borderRadius: 2,
                                                     minWidth: '50px', height: '30px', fontSize: '0.8rem',
@@ -383,6 +395,11 @@ function PlaylistsScreen() {
                 </Box>
             </Box>
             <MUIDeleteModal onConfirm={handleConfirmDelete} />
+            <MUIPlayPlaylistModal
+                open={playingPlaylist !== null}
+                handleClose={handleClosePlayModal}
+                playlist={playingPlaylist}
+            />
         </Box>
     );
 }

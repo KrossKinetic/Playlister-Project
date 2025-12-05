@@ -2,7 +2,7 @@ import React from 'react';
 import YouTube from 'react-youtube';
 import { Box } from '@mui/material';
 
-function YouTubePlayer({ playlist, currentSongIndex, setCurrentSongIndex }) {
+function YouTubePlayer({ playlist, currentSongIndex, setCurrentSongIndex, setPlayerRef }) {
     console.log(playlist);
     const song = playlist[currentSongIndex];
     const videoId = song ? song.youTubeId : "";
@@ -17,6 +17,9 @@ function YouTubePlayer({ playlist, currentSongIndex, setCurrentSongIndex }) {
 
     function onPlayerReady(event) {
         event.target.playVideo();
+        if (setPlayerRef) {
+            setPlayerRef(event.target);
+        }
     }
 
     function handleInternalSongEnd() {
