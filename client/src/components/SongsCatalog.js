@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, useRef, StrictMode } from 'react';
+import { useContext, useEffect, useState, useRef } from 'react';
 import { GlobalStoreContext } from '../store';
 import AuthContext from '../auth';
 import Box from '@mui/material/Box';
@@ -32,6 +32,8 @@ function SongsCatalog() {
     const [isSongPlaying, setIsSongPlaying] = useState(false);
     const [currentSongIndex, setCurrentSongIndex] = useState(0);
     const [anchorEl, setAnchorEl] = useState(null);
+    const [wasModalOpen, setWasModalOpen] = useState(false);
+    const [isUserFilterActive, setIsUserFilterActive] = useState(false);
     const isMenuOpen = Boolean(anchorEl);
 
     const [currentSong, setCurrentSong] = useState({
@@ -58,14 +60,43 @@ function SongsCatalog() {
     }, []);
 
     useEffect(() => {
-        if (store.songCatalog && (store.songCatalog.length > 0) && (!hasInitialSorted.current)) {
-            handleSort("listens-hi-lo");
-            hasInitialSorted.current = true;
+        store.loadSongCatalog();
+        if (auth.loggedIn && auth.guestLoggedIn === false) {
+            setFilteredSongs(store.songCatalog.filter(s => (s.created_by === auth.user.email)));
+            setIsUserFilterActive(true);
+        } else {
+            setFilteredSongs(store.songCatalog);
+            setIsUserFilterActive(false);
         }
-    }, [store.songCatalog]);
+    }, [auth]);
 
     useEffect(() => {
-        setFilteredSongs(store.songCatalog);
+        if (!wasModalOpen) {
+            if (auth.loggedIn && auth.guestLoggedIn === false) {
+                setFilteredSongs(store.songCatalog.filter(s => (s.created_by === auth.user.email)));
+                setIsUserFilterActive(true);
+            } else {
+                setFilteredSongs(store.songCatalog);
+                setIsUserFilterActive(false);
+            }
+        } else {
+            setWasModalOpen(false);
+            if (isUserFilterActive) {
+                let tempFilter = store.songCatalog.filter(s => (s.created_by === auth.user.email));
+                const comparator = getComparator(sortType);
+                if (comparator && tempFilter) {
+                    const sorted = [...tempFilter].sort(comparator);
+                    setFilteredSongs(sorted);
+                }
+            } else {
+                setFilteredSongs(store.songCatalog);
+                handleSearch();
+            }
+        }
+        if (store.songCatalog && (store.songCatalog.length > 0) && (!hasInitialSorted.current)) {
+            handleSort("title-a-z");
+            hasInitialSorted.current = true;
+        }
     }, [store.songCatalog]);
 
     const getComparator = (type) => {
@@ -122,6 +153,7 @@ function SongsCatalog() {
         }
         setFilteredSongs(filtered);
         setIsSongPlaying(false);
+        setIsUserFilterActive(false);
     };
 
     const handleClear = () => {
@@ -131,7 +163,13 @@ function SongsCatalog() {
         setSortType("listens-hi-lo");
         setIsSongPlaying(false);
         setCurrentSongIndex(0);
-        setFilteredSongs(store.songCatalog);
+        if (auth.loggedIn && auth.guestLoggedIn === false) {
+            setFilteredSongs(store.songCatalog.filter(s => (s.created_by === auth.user.email)));
+            setIsUserFilterActive(true);
+        } else {
+            setFilteredSongs(store.songCatalog);
+            setIsUserFilterActive(false);
+        }
     };
 
     const handleMenuOpen = (event, song) => {
@@ -159,6 +197,7 @@ function SongsCatalog() {
 
     const handleConfirmRemoveSong = () => {
         store.removeSong(currentSong._id);
+        setWasModalOpen(true);
         setIsRemoveSongModalOpen(false);
     };
 
@@ -178,6 +217,7 @@ function SongsCatalog() {
         } else {
             setEditSongModalError(result);
         }
+        setWasModalOpen(true);
     };
 
     const handleCancelEditSong = () => {
@@ -195,6 +235,7 @@ function SongsCatalog() {
         } else {
             setCreateSongModalError(result);
         }
+        setWasModalOpen(true);
     };
 
     const handleCancelCreateSong = () => {

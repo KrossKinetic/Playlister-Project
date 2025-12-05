@@ -5,14 +5,14 @@ import { AuthContextProvider } from './auth';
 import { GlobalStoreContextProvider } from './store'
 import {
     AppBanner,
-    HomeWrapper,
     LoginScreen,
     RegisterScreen,
     Statusbar,
     WorkspaceScreen,
     EditAccount,
     PlaylistsScreen,
-    SongsCatalog
+    SongsCatalog,
+    HomeWrapper
 } from './components'
 /*
   This is the entry-point for our application. Notice that we
