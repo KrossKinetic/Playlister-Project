@@ -196,6 +196,13 @@ export default function AppBanner() {
                     </Typography>
                     <Box sx={{ flexGrow: 1 }}></Box>
                     <Box sx={{ height: "90px", display: { xs: 'none', md: 'flex' } }}>
+                        {
+                            auth.loggedIn ? (
+                                <Typography variant="h6" color="inherit" component="div" sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+                                    Welcome {auth.user.username}!
+                                </Typography>
+                            ) : null
+                        }
                         <IconButton
                             size="large"
                             edge="end"
