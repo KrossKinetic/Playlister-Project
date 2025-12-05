@@ -29,13 +29,13 @@ export async function api(path, options = {}) {
 // WORK, AND SOME REQUIRE DATA, WHICH WE WE WILL FORMAT HERE, FOR WHEN
 // WE NEED TO PUT THINGS INTO THE DATABASE OR IF WE HAVE SOME
 // CUSTOM FILTERS FOR QUERIES
-export async function createPlaylist(newListName, newSongs, userEmail) {
+export async function createPlaylist(newListName, listens, userEmail) {
     const res = await api('/playlist/', { // This sends you the promise for the Response object
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             name: newListName,
-            songs: newSongs,
+            listens: listens,
             ownerEmail: userEmail
         })
     });
@@ -165,6 +165,19 @@ export async function updatePlaylistById(id, playlist) {
     return { data: data, status: res.status, statusText: res.statusText };
 }
 
+export async function getPlaylists() {
+    const res = await api(`/playlists/`, {
+        method: 'GET'
+    });
+
+    let data = { success: false };
+    try {
+        data = await res.json();
+    } catch (err) { }
+
+    return { data: data, status: res.status, statusText: res.statusText };
+}
+
 const apis = {
     createPlaylist,
     deletePlaylistById,
@@ -174,6 +187,7 @@ const apis = {
     updatePlaylistById,
     createSong,
     deleteSong,
-    updateSong
+    updateSong,
+    getPlaylists
 }
 export default apis

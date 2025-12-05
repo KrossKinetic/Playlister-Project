@@ -185,16 +185,54 @@ const songs = [
     }
 ];
 
+const Playlist = require('../db/mongo/playlist-model');
+
 async function populateSongs() {
     try {
         await mongoose.connect(process.env.DB_CONNECT, { useNewUrlParser: true });
-        console.log('Connected to Mongo, populating Song collection...');
+        console.log('Connected to Mongo, populating Song and Playlist collections...');
+
+        // Clear existing data
         await Song.deleteMany({});
         console.log('Song collection cleared');
-        await Song.insertMany(songs);
-        console.log(`Inserted ${songs.length} songs`);
+        await Playlist.deleteMany({});
+        console.log('Playlist collection cleared');
+
+        // Create Playlists
+        const playlistsData = [
+            { name: "Rock Classics", ownerEmail: "kross@gmail.com", listens: 0, songs: [] },
+            { name: "My Pop Hits", ownerEmail: "kross@gmail.com", listens: 0, songs: [] },
+            { name: "Chill Vibes", ownerEmail: "kross_other@gmail.com", listens: 0, songs: [] },
+            { name: "Workout Mix", ownerEmail: "kross@gmail.com", listens: 0, songs: [] }
+        ];
+
+        const createdPlaylists = await Playlist.insertMany(playlistsData);
+        console.log(`Inserted ${createdPlaylists.length} playlists`);
+
+        // Prepare Songs with Random Playlist Assignments
+        const songsWithPlaylists = songs.map(song => {
+            const assignedPlaylists = [];
+            // Randomly assign to 0-3 playlists
+            const numAssignments = Math.floor(Math.random() * 4);
+            // Shuffle playlists to pick random ones
+            const shuffledPlaylists = createdPlaylists.sort(() => 0.5 - Math.random());
+
+            for (let i = 0; i < numAssignments; i++) {
+                if (shuffledPlaylists[i]) {
+                    assignedPlaylists.push(shuffledPlaylists[i]._id);
+                }
+            }
+            return {
+                ...song,
+                playlists: assignedPlaylists
+            };
+        });
+
+        await Song.insertMany(songsWithPlaylists);
+        console.log(`Inserted ${songsWithPlaylists.length} songs with playlist assignments`);
+
     } catch (err) {
-        console.error('Error populating songs:', err);
+        console.error('Error seeding data:', err);
     } finally {
         try { await mongoose.disconnect(); } catch (e) { }
         process.exit(0);

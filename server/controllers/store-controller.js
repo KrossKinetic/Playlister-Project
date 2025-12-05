@@ -222,13 +222,7 @@ updateSong = async (req, res) => {
 }
 
 getPlaylists = async (req, res) => {
-    if (auth.verifyUser(req) === null) {
-        return res.status(400).json({
-            errorMessage: 'UNAUTHORIZED'
-        })
-    }
-
-    const response = await DatabaseManager.getPlaylist()
+    const response = await DatabaseManager.getPlaylists()
 
     if (!response || !response.success) {
         return res.status(400).json({
@@ -239,7 +233,7 @@ getPlaylists = async (req, res) => {
 
     return res.status(200).json({
         success: true,
-        playlist: response.data
+        playlists: response.data
     });
 }
 updatePlaylist = async (req, res) => {

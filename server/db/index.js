@@ -47,8 +47,8 @@ class DatabaseManager {
         return MongoDatabaseManagerStore.updatePlaylist(req, body)
     }
 
-    static getPlaylist = async () => {
-        return MongoDatabaseManagerStore.getPlaylist()
+    static getPlaylists = async () => {
+        return MongoDatabaseManagerStore.getPlaylists()
     }
 
     static getPlaylistPairs = async (req) => {

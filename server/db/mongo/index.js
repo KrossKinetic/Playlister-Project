@@ -174,7 +174,7 @@ class MongoDatabaseManagerStore {
 
 
     // Get playlist
-    static async getPlaylist() {
+    static async getPlaylists() {
         try {
             const playlists = (await Playlist.find({}).sort({ name: 1 })).map(p => p.toObject());
 
