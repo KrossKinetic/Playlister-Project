@@ -197,9 +197,9 @@ updateSong = async (req, res) => {
         })
     }
     const body = req.body;
-    console.log("updateSong: " + JSON.stringify(body));
 
     if (!body) {
+        console.log("updateSong req: " + JSON.stringify(req));
         return res.status(400).json({
             success: false,
             errorMessage: 'You must provide a body to update',
@@ -207,6 +207,8 @@ updateSong = async (req, res) => {
     }
 
     const response = await DatabaseManager.updateSong(req, body);
+
+    console.log("Message: " + response?.message);
 
     if (!response || !response.success) {
         return res.status(400).json({

@@ -19,6 +19,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import MUIDeleteSongModal from './MUIDeleteSongModal';
 import MUIEditSongModal from './MUIEditSongModal';
 import MUICreateSongModal from './MUICreateSongModal';
+import ErrorToast from './ErrorToast';
 
 function SongsCatalog() {
     const { store } = useContext(GlobalStoreContext);
@@ -35,6 +36,10 @@ function SongsCatalog() {
     const [wasModalOpen, setWasModalOpen] = useState(false);
     const [isUserFilterActive, setIsUserFilterActive] = useState(false);
     const isMenuOpen = Boolean(anchorEl);
+    const [errorToastState, setErrorToastState] = useState({
+        open: false,
+        message: ""
+    });
 
     const [currentSong, setCurrentSong] = useState({
         title: "",
@@ -43,7 +48,8 @@ function SongsCatalog() {
         youTubeId: "",
         created_by: "",
         listens: 0,
-        playlists: 0,
+        playlists: [],
+        playlistsCount: 0,
         _id: ""
     });
 
@@ -57,10 +63,12 @@ function SongsCatalog() {
 
     useEffect(() => {
         store.loadSongCatalog();
+        store.loadPlaylists();
     }, []);
 
     useEffect(() => {
         store.loadSongCatalog();
+        store.loadPlaylists();
         if (auth.loggedIn && auth.guestLoggedIn === false) {
             setFilteredSongs(store.songCatalog.filter(s => (s.created_by === auth.user.email)));
             setIsUserFilterActive(true);
@@ -106,9 +114,9 @@ function SongsCatalog() {
             case "listens-lo-hi":
                 return (a, b) => a.listens - b.listens;
             case "playlists-hi-lo":
-                return (a, b) => b.playlists - a.playlists;
+                return (a, b) => b.playlistsCount - a.playlistsCount;
             case "playlists-lo-hi":
-                return (a, b) => a.playlists - b.playlists;
+                return (a, b) => a.playlistsCount - b.playlistsCount;
             case "title-a-z":
                 return (a, b) => a.title.localeCompare(b.title);
             case "title-z-a":
@@ -181,8 +189,44 @@ function SongsCatalog() {
         setAnchorEl(null);
     };
 
+    const [anchorElAdd, setAnchorElAdd] = useState(null);
+    const isMenuOpenAdd = Boolean(anchorElAdd);
+
+    const handleMenuOpenAdd = (event) => {
+        setAnchorElAdd(event.currentTarget);
+        setWasModalOpen(true);
+    };
+
     const handleMenuCloseAdd = () => {
-        setAnchorEl(null);
+        setAnchorElAdd(null);
+        handleMenuClose();
+    };
+
+    const handleAddSongToPlaylist = async (playlist, song) => {
+        console.log("Playlists:", song.playlists);
+        const response = await store.updateSong(song._id, {
+            title: song.title,
+            artist: song.artist,
+            year: song.year,
+            youTubeId: song.youTubeId,
+            playlists: [...song.playlists, playlist._id]
+        });
+
+        if (response === "success") {
+            handleMenuCloseAdd();
+        } else {
+            if (response === "Song already exists, choose a different title, artist, or year") {
+                setErrorToastState({
+                    open: true,
+                    message: "This song already exists in this playlist, choose a different song or playlist."
+                })
+            } else {
+                setErrorToastState({
+                    open: true,
+                    message: response
+                })
+            }
+        }
     };
 
     const handleMenuCloseEdit = () => {
@@ -241,6 +285,11 @@ function SongsCatalog() {
     const handleCancelCreateSong = () => {
         setIsCreateSongModalOpen(false);
     };
+
+    let menu_list = [];
+    if (store.playlists && auth.user) {
+        menu_list = store.playlists.filter(p => p.ownerEmail === auth.user.email);
+    }
 
     return (
         <Box sx={{ display: 'flex', width: '100%', height: '80vh', bgcolor: '#fffff0' }}>
@@ -423,7 +472,7 @@ function SongsCatalog() {
                                 </Box>
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
                                     <Box>Listens: {song.listens.toLocaleString()}</Box>
-                                    <Box>Playlists: {song.playlists}</Box>
+                                    <Box>Playlists: {song.playlistsCount}</Box>
                                 </Box>
                             </Box>
                         )))
@@ -467,7 +516,7 @@ function SongsCatalog() {
                 >
                     {
                         auth.loggedIn && (auth.guestLoggedIn === false) && (
-                            <MenuItem onClick={handleMenuCloseAdd}>Add to Playlist</MenuItem>
+                            <MenuItem onClick={handleMenuOpenAdd}>Add to Playlist</MenuItem>
                         )
                     }
                     {
@@ -479,6 +528,39 @@ function SongsCatalog() {
                         auth.loggedIn && (auth.user.email === currentSong.created_by) && (
                             <MenuItem onClick={handleMenuCloseRemove}>Remove from Catalog</MenuItem>
                         )
+                    }
+                </Menu>
+            }
+            {
+                <Menu
+                    anchorEl={anchorElAdd}
+                    anchorOrigin={{
+                        vertical: 'top',
+                        horizontal: 'left',
+                    }}
+                    keepMounted
+                    transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'right',
+                    }}
+                    open={isMenuOpenAdd}
+                    onClose={handleMenuCloseAdd}
+                    PaperProps={{
+                        style: {
+                            maxHeight: 200,
+                            width: '20ch',
+                        },
+                    }}
+                >
+                    {
+                        menu_list.map((playlist) => (
+                            <MenuItem
+                                key={playlist._id}
+                                onClick={() => handleAddSongToPlaylist(playlist, currentSong)}
+                            >
+                                {playlist.name}
+                            </MenuItem>
+                        ))
                     }
                 </Menu>
             }
@@ -509,6 +591,15 @@ function SongsCatalog() {
                         handleCancelCreate={handleCancelCreateSong}
                         open={isCreateSongModalOpen}
                         error={CreateSongModalError}
+                    />
+                )
+            }
+            {
+                errorToastState.open && (
+                    <ErrorToast
+                        open={errorToastState.open}
+                        message={errorToastState.message}
+                        setOpen={setErrorToastState}
                     />
                 )
             }

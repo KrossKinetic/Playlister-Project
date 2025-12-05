@@ -294,7 +294,8 @@ class MongoDatabaseManagerStore {
 
             const songData = songs.map(song => {
                 const songObj = song.toObject();
-                songObj.playlists = song.playlists.length;
+                songObj.playlists = song.playlists;
+                songObj.playlistsCount = song.playlists.length;
                 return songObj;
             });
 
@@ -362,7 +363,7 @@ class MongoDatabaseManagerStore {
 
     static async updateSong(req, body) {
         try {
-            const oldSong = await Song.findOne({ title: body.title, artist: body.artist, year: body.year });
+            const oldSong = await Song.findOne({ title: body.title, artist: body.artist, year: body.year, listens: body.listens, playlists: body.playlists });
             if (oldSong) {
                 return { success: false, message: "Song already exists, choose a different title, artist, or year" };
             }
@@ -376,19 +377,32 @@ class MongoDatabaseManagerStore {
                 return { success: false, message: "User not found" };
             }
 
-            if (song.created_by !== user.email) {
+            if (song.created_by !== user.email && (song.playlists === body.playlists || song.listens === body.listens)) {
                 return { success: false, message: "Authentication error" };
             }
+
+            console.log("Updating song:", song);
 
             song.title = body.title;
             song.artist = body.artist;
             song.year = body.year;
             song.youTubeId = body.youTubeId;
 
+            if (body.listens) {
+                song.listens = body.listens;
+            }
+
+            if (body.playlists) {
+                song.playlists = body.playlists;
+            }
+
+            console.log("Updated song:", song);
+
             await song.save();
             return { success: true, song: song };
         } catch (err) {
-            console.error("Error updating song:", err);
+            console.log("Error updating song:", err);
+
             return { success: false, message: err.message };
         }
     }

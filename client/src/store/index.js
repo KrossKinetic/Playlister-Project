@@ -384,38 +384,18 @@ function GlobalStoreContextProvider(props) {
     }
 
     // THIS FUNCTION LOADS ALL THE ID, NAME PAIRS SO WE CAN LIST ALL THE LISTS
-    store.loadIdNamePairs = function () {
-        async function asyncLoadIdNamePairs() {
-            const response = await storeRequestSender.getPlaylistPairs();
-            if (response.data.success) {
-                let pairsArray = response.data.idNamePairs;
-                console.log(pairsArray);
-                storeReducer({
-                    type: GlobalStoreActionType.LOAD_ID_NAME_PAIRS,
-                    payload: pairsArray
-                });
-            }
-            else {
-                console.log("FAILED TO GET THE LIST PAIRS");
-            }
-        }
-        asyncLoadIdNamePairs();
-    }
 
-    store.loadSongCatalog = function () {
-        async function asyncLoadSongCatalog() {
-            const response = await storeRequestSender.getSongPairs();
-            if (response.data.success) {
-                let songs = response.data.songs;
-                storeReducer({
-                    type: GlobalStoreActionType.LOAD_SONG_CATALOG,
-                    payload: songs
-                });
-            } else {
-                console.log("FAILED TO GET THE SONG CATALOG");
-            }
+    store.loadSongCatalog = async function () {
+        const response = await storeRequestSender.getSongPairs();
+        if (response.data.success) {
+            let songs = response.data.songs;
+            storeReducer({
+                type: GlobalStoreActionType.LOAD_SONG_CATALOG,
+                payload: songs
+            });
+        } else {
+            console.log("FAILED TO GET THE SONG CATALOG");
         }
-        asyncLoadSongCatalog();
     }
 
     store.markListForDeletion = function (id) {
@@ -433,7 +413,6 @@ function GlobalStoreContextProvider(props) {
     }
     store.deleteList = async function (id) {
         let response = await storeRequestSender.deletePlaylistById(id);
-        store.loadIdNamePairs();
         store.loadPlaylists();
         if (response.data.success) {
             history.push("/");
