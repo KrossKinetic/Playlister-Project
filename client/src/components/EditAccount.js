@@ -79,7 +79,7 @@ export default function EditAccount() {
         event.preventDefault();
         auth.updateUser(
             formData.username,
-            image,
+            image.src,
             formData.password,
             formData.passwordVerify
         );

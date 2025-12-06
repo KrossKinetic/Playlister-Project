@@ -289,7 +289,7 @@ function SongsCatalog() {
     }
 
     return (
-        <Box sx={{ display: 'flex', width: '100%', height: '80vh', bgcolor: '#fffff0' }}>
+        <Box sx={{ display: 'flex', width: '100%', height: '90vh', bgcolor: '#fffff0' }}>
             <Box sx={{ width: '50%', borderRight: '2px solid #9d9d9dff', p: 2 }}>
                 <h1 style={{ color: '#aa00aa', fontSize: '3rem', margin: '0 0 20px 0' }}>Songs Catalog</h1>
                 <Box component="form" noValidate onSubmit={(e) => { e.preventDefault(); handleSearch(); }} sx={{ mt: 2 }}>

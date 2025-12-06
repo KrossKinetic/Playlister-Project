@@ -81,7 +81,7 @@ export default function RegisterScreen() {
         event.preventDefault();
         auth.registerUser(
             formData.username,
-            image,
+            image.src,
             formData.email,
             formData.password,
             formData.passwordVerify

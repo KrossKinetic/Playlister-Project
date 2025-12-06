@@ -205,7 +205,7 @@ function PlaylistsScreen() {
     );
 
     return (
-        <Box sx={{ display: 'flex', width: '100%', height: '80vh', bgcolor: '#fffff0' }}>
+        <Box sx={{ display: 'flex', width: '100%', height: '90vh', bgcolor: '#fffff0' }}>
             <Box sx={{ width: '50%', borderRight: '2px solid #9d9d9dff', p: 2, display: 'flex', flexDirection: 'column' }}>
                 <Typography variant="h4" sx={{ color: '#aa00aa', fontWeight: 'bold', mb: 2 }}>Playlists</Typography>
                 <Box component="form" noValidate onSubmit={(e) => { e.preventDefault(); handleSearch(); }} sx={{ mt: 1 }}>
