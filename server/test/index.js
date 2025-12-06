@@ -240,52 +240,71 @@ async function populateSongs() {
         await Playlist.deleteMany({});
         console.log('Playlist collection cleared');
 
-        // Create Playlists
+        // Create Playlists (initially empty songs)
         const playlistsData = [
-            { name: "Rock Classics", ownerEmail: "kross@gmail.com", listens: 0 },
-            { name: "My Pop Hits", ownerEmail: "kross@gmail.com", listens: 0 },
-            { name: "Chill Vibes", ownerEmail: "kross_other@gmail.com", listens: 0 },
-            { name: "Workout Mix", ownerEmail: "kross@gmail.com", listens: 0 }
+            { name: "Rock Classics", ownerEmail: "kross@gmail.com", listens: 0, songs: [] },
+            { name: "My Pop Hits", ownerEmail: "kross@gmail.com", listens: 0, songs: [] },
+            { name: "Chill Vibes", ownerEmail: "kross_other@gmail.com", listens: 0, songs: [] },
+            { name: "Workout Mix", ownerEmail: "kross@gmail.com", listens: 0, songs: [] }
         ];
 
+        // Insert empty playlists first to get IDs? Or just create docs?
+        // Let's create docs but not save yet, or just save empty is fine.
         const createdPlaylists = await Playlist.insertMany(playlistsData);
         console.log(`Inserted ${createdPlaylists.length} playlists`);
 
-        // Prepare Songs with Random Playlist Assignments and DURATIONS
-        const songsWithPlaylists = [];
+        // Prepare Songs
+        // We will insert songs first, then assign them to random playlists
+        const songsWithDuration = [];
 
         for (let s = 0; s < songs.length; s++) {
             let song = songs[s];
 
-            const assignedPlaylists = [];
-            // Randomly assign to 0-3 playlists
-            const numAssignments = Math.floor(Math.random() * 4);
-            // Shuffle playlists to pick random ones
-            const shuffledPlaylists = createdPlaylists.sort(() => 0.5 - Math.random());
-
-            for (let i = 0; i < numAssignments; i++) {
-                if (shuffledPlaylists[i]) {
-                    assignedPlaylists.push(shuffledPlaylists[i]._id);
-                }
-            }
+            // Delete the old 'playlists' field if it exists in the source array object (it does in the file)
+            delete song.playlists;
 
             // Fetch Duration
             let duration = "0:00";
             if (song.youTubeId) {
-                console.log(`Fetching duration for ${song.title} (${song.youTubeId})...`);
+                // console.log(`Fetching duration for ${song.title} (${song.youTubeId})...`);
                 duration = await getYouTubeDuration(song.youTubeId);
-                console.log(`Duration: ${duration}`);
+                // console.log(`Duration: ${duration}`);
             }
 
-            songsWithPlaylists.push({
+            songsWithDuration.push({
                 ...song,
-                playlists: assignedPlaylists,
                 duration: duration
             });
         }
 
-        await Song.insertMany(songsWithPlaylists);
-        console.log(`Inserted ${songsWithPlaylists.length} songs with playlist assignments`);
+        const createdSongs = await Song.insertMany(songsWithDuration);
+        console.log(`Inserted ${createdSongs.length} songs`);
+
+        // Now assign songs to playlists
+        // For each song, randomly assign it to some playlists
+        for (let i = 0; i < createdSongs.length; i++) {
+            const song = createdSongs[i];
+            const numAssignments = Math.floor(Math.random() * 2); // 0 or 1 playlist per song for simplicity, or more
+
+            const shuffledPlaylists = createdPlaylists.sort(() => 0.5 - Math.random());
+
+            // Let's ensure at least some songs get into playlists
+            if (i < 10) {
+                // Force first 10 songs into the first playlist
+                createdPlaylists[0].songs.push(song._id);
+            } else {
+                if (Math.random() > 0.5) {
+                    // randomly add to a random playlist
+                    shuffledPlaylists[0].songs.push(song._id);
+                }
+            }
+        }
+
+        // Save updated playlists
+        for (let p of createdPlaylists) {
+            await p.save();
+        }
+        console.log("Updated playlists with songs");
 
     } catch (err) {
         console.error('Error seeding data:', err);

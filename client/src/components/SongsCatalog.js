@@ -102,7 +102,7 @@ function SongsCatalog() {
             }
         }
         if (store.songCatalog && (store.songCatalog.length > 0) && (!hasInitialSorted.current)) {
-            handleSort("title-a-z");
+            handleSort("listens-hi-lo");
             hasInitialSorted.current = true;
         }
     }, [store.songCatalog]);
@@ -149,6 +149,7 @@ function SongsCatalog() {
     };
 
     const handleSearch = () => {
+        console.log(filteredSongs)
         const filtered = store.songCatalog.filter(song => {
             const titleMatch = song.title.toLowerCase().includes(searchTitle.toLowerCase());
             const artistMatch = song.artist.toLowerCase().includes(searchArtist.toLowerCase());
@@ -200,29 +201,29 @@ function SongsCatalog() {
     };
 
     const handleAddSongToPlaylist = async (playlist, song) => {
-        console.log("Playlists:", song.playlists);
-        const response = await store.updateSong(song._id, {
-            title: song.title,
-            artist: song.artist,
-            year: song.year,
-            youTubeId: song.youTubeId,
-            playlists: [...song.playlists, playlist._id]
+        if (playlist.songs.includes(song._id)) {
+            setErrorToastState({
+                open: true,
+                message: "This song already exists in this playlist, choose a different song or playlist."
+            })
+            return;
+        }
+
+        const response = await store.updatePlaylist(playlist._id, {
+            name: playlist.name,
+            ownerEmail: playlist.ownerEmail,
+            listens: playlist.listens,
+            songs: [...playlist.songs, song._id]
         });
 
         if (response === "success") {
+            store.loadSongCatalog();
             handleMenuCloseAdd();
         } else {
-            if (response === "Song already exists, choose a different title, artist, or year") {
-                setErrorToastState({
-                    open: true,
-                    message: "This song already exists in this playlist, choose a different song or playlist."
-                })
-            } else {
-                setErrorToastState({
-                    open: true,
-                    message: response
-                })
-            }
+            setErrorToastState({
+                open: true,
+                message: response
+            })
         }
     };
 

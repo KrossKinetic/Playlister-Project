@@ -271,9 +271,11 @@ function GlobalStoreContextProvider(props) {
                 type: GlobalStoreActionType.LOAD_PLAYLISTS,
                 payload: playlistsArray
             });
+            return { success: true, playlists: playlistsArray };
         }
         else {
             console.log("FAILED TO GET THE LIST PAIRS");
+            return { success: false };
         }
     }
 
@@ -393,22 +395,18 @@ function GlobalStoreContextProvider(props) {
             let newPlaylist = response.data.playlist;
 
             if (playlistToCopy.songs && playlistToCopy.songs.length > 0) {
-                const updatePromises = playlistToCopy.songs.map(song => {
-                    let newPlaylists = [...song.playlists, newPlaylist._id];
+                // The new playlist needs to reference these songs.
+                // Since songs are shared references now (normalized?), we just need to copy the IDs.
+                // Wait, if we are copying a playlist, do we copy the song *documents* or just the references?
+                // The original code seemingly just added the new playlist ID to the *existing* song's `playlists` array.
+                // This implies songs were shared.
+                // So now we just need to set the `songs` array of the new playlist to match the old playlist's song IDs.
 
-                    let updatedSongData = {
-                        title: song.title,
-                        artist: song.artist,
-                        year: song.year,
-                        youTubeId: song.youTubeId,
-                        listens: song.listens,
-                        playlists: newPlaylists
-                    };
+                let songIds = playlistToCopy.songs.map(s => s._id);
+                newPlaylist.songs = songIds;
 
-                    return storeRequestSender.updateSong(song._id, updatedSongData);
-                });
-
-                await Promise.all(updatePromises);
+                // Update the new playlist with these songs
+                await storeRequestSender.updatePlaylistById(newPlaylist._id, newPlaylist);
             }
 
             store.loadPlaylists();
@@ -590,18 +588,31 @@ function GlobalStoreContextProvider(props) {
         let transaction = new UpdateSong_Transaction(this, index, oldSongData, newSongData);
         tps.processTransaction(transaction);
     }
-    store.updateCurrentList = function () {
-        async function asyncUpdateCurrentList() {
-            const response = await storeRequestSender.updatePlaylistById(store.currentList._id, store.currentList);
-            if (response.data.success) {
-                storeReducer({
-                    type: GlobalStoreActionType.SET_CURRENT_LIST,
-                    payload: store.currentList
-                });
-            }
+
+    store.updateCurrentList = async function () {
+        const response = await storeRequestSender.updatePlaylistById(store.currentList._id, store.currentList);
+        if (response.data.success) {
+            storeReducer({
+                type: GlobalStoreActionType.SET_CURRENT_LIST,
+                payload: store.currentList
+            });
         }
-        asyncUpdateCurrentList();
     }
+
+    store.updatePlaylist = async function (id, playlist) {
+        const response = await storeRequestSender.updatePlaylistById(id, playlist);
+        if (response.data.success) {
+            const playlists = await store.loadPlaylists()
+            storeReducer({
+                type: GlobalStoreActionType.LOAD_PLAYLIST,
+                payload: playlists
+            });
+            return "success";
+        } else {
+            return response.data.errorMessage;
+        }
+    }
+
     store.undo = function () {
         tps.undoTransaction();
     }

@@ -20,6 +20,7 @@ import MenuItem from '@mui/material/MenuItem';
 import MUIDeleteModal from './MUIDeleteModal';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import MUIPlayPlaylistModal from './MUIPlayPlaylistModal';
+import MUIEditPlaylistModal from './MUIEditPlaylistModal';
 
 function PlaylistsScreen() {
     const { store } = useContext(GlobalStoreContext);
@@ -39,12 +40,14 @@ function PlaylistsScreen() {
     const [isUserFilterActive, setIsUserFilterActive] = useState(false);
 
     const [playingPlaylist, setPlayingPlaylist] = useState(null);
+    const [editingPlaylist, setEditingPlaylist] = useState(null);
 
     useEffect(() => {
         store.loadPlaylists();
     }, []);
 
     useEffect(() => {
+        console.log(store.playlists);
         if (store.playlists) {
             if (wasModalOpen) {
                 setWasModalOpen(false);
@@ -116,6 +119,14 @@ function PlaylistsScreen() {
         setPlayingPlaylist(null);
     };
 
+    const handleEditPlaylist = (playlist) => {
+        setEditingPlaylist(playlist);
+    };
+
+    const handleCloseEditModal = () => {
+        setEditingPlaylist(null);
+    };
+
     const getComparator = (type) => {
         switch (type) {
             case "listens-hi-lo": return (a, b) => b.listens - a.listens;
@@ -138,6 +149,7 @@ function PlaylistsScreen() {
     };
 
     const handleSearch = () => {
+
         if (!store.playlists) return;
         const filtered = store.playlists.filter(p => {
             const nameMatch = p.name.toLowerCase().includes(searchPlaylistName.toLowerCase());
@@ -313,6 +325,7 @@ function PlaylistsScreen() {
                                                         </Button>
                                                         <Button
                                                             variant="contained"
+                                                            onClick={(e) => { e.stopPropagation(); handleEditPlaylist(playlist); }}
                                                             sx={{
                                                                 bgcolor: '#1976d2', color: 'white', textTransform: 'none', borderRadius: 2,
                                                                 minWidth: '50px', height: '30px', fontSize: '0.8rem',
@@ -409,6 +422,11 @@ function PlaylistsScreen() {
                 open={playingPlaylist !== null}
                 handleClose={handleClosePlayModal}
                 playlist={playingPlaylist}
+            />
+            <MUIEditPlaylistModal
+                open={editingPlaylist !== null}
+                handleClose={handleCloseEditModal}
+                playlist={editingPlaylist}
             />
         </Box>
     );

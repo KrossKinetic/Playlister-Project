@@ -2,10 +2,6 @@ const { MongoDatabaseManagerAuth, MongoDatabaseManagerStore } = require('./mongo
 
 class DatabaseManager {
 
-    static async resetDb() {
-        await MongoDatabaseManagerStore.reset();
-    }
-
     static async initDatabase() {
         await MongoDatabaseManagerStore.initDb()
     }
