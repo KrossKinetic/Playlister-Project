@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import YouTube from 'react-youtube';
 import { Box } from '@mui/material';
-import Typography from '@mui/material/Typography';
 
-function YouTubePlayer({ playlist, currentSongIndex, setCurrentSongIndex, setPlayerRef, playerRef }) {
+function YouTubePlayer({ playlist, currentSongIndex, setCurrentSongIndex, setPlayerRef }) {
     const [song, setSong] = useState(playlist[currentSongIndex]);
     const [videoId, setVideoId] = useState(song ? song.youTubeId : "");
 

@@ -12,7 +12,7 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
-import YouTubePlayer from './youtube';
+import YouTubePlayer from './youtube_songscatalog';
 import Typography from '@mui/material/Typography';
 import Menu from '@mui/material/Menu';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -31,7 +31,7 @@ function SongsCatalog() {
     const [sortType, setSortType] = useState("listens-hi-lo");
     const hasInitialSorted = useRef(false);
     const [isSongPlaying, setIsSongPlaying] = useState(false);
-    const [currentSongIndex, setCurrentSongIndex] = useState(0);
+    const [currentSongForPlaying, setCurrentSongForPlaying] = useState(0);
     const [anchorEl, setAnchorEl] = useState(null);
     const [wasModalOpen, setWasModalOpen] = useState(false);
     const [isUserFilterActive, setIsUserFilterActive] = useState(false);
@@ -135,8 +135,8 @@ function SongsCatalog() {
     };
 
     const handleSongClick = (song) => {
-        setCurrentSongIndex(filteredSongs.indexOf(song));
         setIsSongPlaying(true);
+        setCurrentSongForPlaying(song.youTubeId);
     };
 
     const handleSort = (type) => {
@@ -160,7 +160,6 @@ function SongsCatalog() {
             filtered.sort(comparator);
         }
         setFilteredSongs(filtered);
-        setIsSongPlaying(false);
         setIsUserFilterActive(false);
     };
 
@@ -169,8 +168,6 @@ function SongsCatalog() {
         setSearchArtist("");
         setSearchYear("");
         setSortType("listens-hi-lo");
-        setIsSongPlaying(false);
-        setCurrentSongIndex(0);
         if (auth.loggedIn && auth.guestLoggedIn === false) {
             setFilteredSongs(store.songCatalog.filter(s => (s.created_by === auth.user.email)));
             setIsUserFilterActive(true);
@@ -399,13 +396,7 @@ function SongsCatalog() {
                         </Button>
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-                        {
-                            isSongPlaying ? (
-                                <YouTubePlayer playlist={(filteredSongs.length > 0) ? filteredSongs : store.songCatalog} currentSongIndex={currentSongIndex} setCurrentSongIndex={setCurrentSongIndex} />
-                            ) : (
-                                <div></div>
-                            )
-                        }
+                        {isSongPlaying && <YouTubePlayer videoId={currentSongForPlaying} />}
                     </Box>
                 </Box>
             </Box>
