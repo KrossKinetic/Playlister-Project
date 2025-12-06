@@ -48,13 +48,17 @@ class MongoDatabaseManagerStore {
         async function resetMongo() {
             const Playlist = require('./playlist-model')
             const User = require("./user-model")
-            const testData = require("../../test/data/example-db-data.json")
+            const Song = require("./song-model")
+            // Correct logic to get test data
+            const testData = require("../../test/PlaylisterData.json")
 
             console.log("Resetting the Mongo DB")
             await clearCollection(Playlist, "Playlist");
             await clearCollection(User, "User");
-            await fillCollection(Playlist, "Playlist", testData.playlists);
+            await clearCollection(Song, "Song");
+
             await fillCollection(User, "User", testData.users);
+            console.log("Playlists and Songs filled");
         }
         await resetMongo();
     }
@@ -283,7 +287,6 @@ class MongoDatabaseManagerStore {
         }
     }
 
-
     // Newly added endpoints
     // Get Song Pairs
     static async getSongPairs(req) {
@@ -296,6 +299,7 @@ class MongoDatabaseManagerStore {
                 const songObj = song.toObject();
                 songObj.playlists = song.playlists;
                 songObj.playlistsCount = song.playlists.length;
+                songObj.duration = song.duration;
                 return songObj;
             });
 
@@ -319,6 +323,11 @@ class MongoDatabaseManagerStore {
                 return { success: false, message: "User not found" };
             }
 
+            let duration = "0:00";
+            if (body.youTubeId) {
+                duration = await MongoDatabaseManagerStore.getYouTubeDuration(body.youTubeId);
+            }
+
             const newSong = new Song({
                 title: body.title,
                 artist: body.artist,
@@ -326,7 +335,8 @@ class MongoDatabaseManagerStore {
                 youTubeId: body.youTubeId,
                 created_by: user.email,
                 playlists: [],
-                listens: 0
+                listens: 0,
+                duration: duration
             });
 
             const savedSong = await newSong.save();
@@ -336,6 +346,48 @@ class MongoDatabaseManagerStore {
             return { success: false, message: err.message };
         }
     }
+
+    static async getYouTubeDuration(videoId) {
+
+        const API_KEY = process.env.YOUTUBE_API_KEY;
+        const url = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=contentDetails&key=${API_KEY}`;
+
+        try {
+            // 2. FETCH: Call the API
+            const response = await fetch(url);
+            const data = await response.json();
+
+            // 3. VALIDATE: Ensure video exists
+            if (!data.items || data.items.length === 0) return "0:00";
+
+            // 4. PARSE: Extract duration (Format is usually PT#H#M#S, e.g., "PT4M13S")
+            const isoDuration = data.items[0].contentDetails.duration;
+            const match = isoDuration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
+
+            // Parse parts (parseInt ignores the letters H, M, S automatically)
+            const hours = (parseInt(match[1]) || 0);
+            const minutes = (parseInt(match[2]) || 0);
+            const seconds = (parseInt(match[3]) || 0);
+
+            // 5. FORMAT: Convert to "MM:SS" or "H:MM:SS"
+            let formattedDuration = "";
+
+            if (hours > 0) {
+                formattedDuration += `${hours}:`;
+                formattedDuration += `${minutes.toString().padStart(2, '0')}:`;
+            } else {
+                formattedDuration += `${minutes}:`;
+            }
+
+            formattedDuration += seconds.toString().padStart(2, '0');
+
+            return formattedDuration; // Returns "3:46" or "1:05:20"
+
+        } catch (error) {
+            console.error("Error fetching duration for videoId " + videoId + ":", error);
+            return "0:00";
+        }
+    };
 
     static async deleteSong(req) {
         try {
@@ -386,7 +438,16 @@ class MongoDatabaseManagerStore {
             song.title = body.title;
             song.artist = body.artist;
             song.year = body.year;
-            song.youTubeId = body.youTubeId;
+
+            // Check if youtubeId changed, if so may need to update duration, but typically updates don't change core ID too often
+            // For now, let's keep it simple as originally requested.
+            if (body.youTubeId && body.youTubeId !== song.youTubeId) {
+                song.youTubeId = body.youTubeId;
+                song.duration = await MongoDatabaseManagerStore.getYouTubeDuration(body.youTubeId);
+            } else {
+                song.youTubeId = body.youTubeId;
+            }
+
 
             if (body.listens) {
                 song.listens = body.listens;

@@ -352,9 +352,14 @@ function PlaylistsScreen() {
                                     <Collapse in={expandedPlaylists[playlist._id]} timeout="auto" unmountOnExit>
                                         <Box sx={{ mt: 2, borderTop: '1px solid #000000ff', pt: 1, maxHeight: '200px', overflowY: 'auto' }}>
                                             {playlist.songs && playlist.songs.map((song, index) => (
-                                                <Typography key={index} variant="body2" sx={{ ml: 2, py: 0.5 }}>
-                                                    {index + 1}. {song.title}
-                                                </Typography>
+                                                <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <Typography variant="body2" sx={{ ml: 2, py: 0.5 }}>
+                                                        {index + 1}. {song.title}
+                                                    </Typography>
+                                                    <Typography variant="body2" sx={{ ml: 2, p: 0.5 }}>
+                                                        {song.duration}
+                                                    </Typography>
+                                                </Box>
                                             ))}
                                             {(!playlist.songs || playlist.songs.length === 0) && (
                                                 <Typography variant="body2" sx={{ ml: 2, fontStyle: 'italic' }}>No songs in this playlist.</Typography>

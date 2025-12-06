@@ -44,6 +44,7 @@ function YouTubePlayer({ playlist, currentSongIndex, setCurrentSongIndex, setPla
                 opts={playerOptions}
                 onReady={onPlayerReady}
                 onEnd={handleInternalSongEnd}
+                onError={handleInternalSongEnd}
                 style={{ height: '100%', width: '100%' }}
             />
         </Box>

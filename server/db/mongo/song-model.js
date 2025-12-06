@@ -11,6 +11,7 @@ const songSchema = new Schema(
         listens: { type: Number, required: true },
         playlists: { type: [{ type: ObjectId, ref: 'Playlist' }], required: true },
         created_by: { type: String, required: true },
+        duration: { type: String }
     },
     { timestamps: true },
 )

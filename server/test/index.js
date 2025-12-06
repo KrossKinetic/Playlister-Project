@@ -187,6 +187,48 @@ const songs = [
 
 const Playlist = require('../db/mongo/playlist-model');
 
+async function getYouTubeDuration(videoId) {
+
+    const API_KEY = process.env.YOUTUBE_API_KEY;
+    const url = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=contentDetails&key=${API_KEY}`;
+
+    try {
+        // 2. FETCH: Call the API
+        const response = await fetch(url);
+        const data = await response.json();
+
+        // 3. VALIDATE: Ensure video exists
+        if (!data.items || data.items.length === 0) return "0:00";
+
+        // 4. PARSE: Extract duration (Format is usually PT#H#M#S, e.g., "PT4M13S")
+        const isoDuration = data.items[0].contentDetails.duration;
+        const match = isoDuration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
+
+        // Parse parts (parseInt ignores the letters H, M, S automatically)
+        const hours = (parseInt(match[1]) || 0);
+        const minutes = (parseInt(match[2]) || 0);
+        const seconds = (parseInt(match[3]) || 0);
+
+        // 5. FORMAT: Convert to "MM:SS" or "H:MM:SS"
+        let formattedDuration = "";
+
+        if (hours > 0) {
+            formattedDuration += `${hours}:`;
+            formattedDuration += `${minutes.toString().padStart(2, '0')}:`;
+        } else {
+            formattedDuration += `${minutes}:`;
+        }
+
+        formattedDuration += seconds.toString().padStart(2, '0');
+
+        return formattedDuration; // Returns "3:46" or "1:05:20"
+
+    } catch (error) {
+        console.error("Error fetching duration for videoId " + videoId + ":", error);
+        return "0:00";
+    }
+};
+
 async function populateSongs() {
     try {
         await mongoose.connect(process.env.DB_CONNECT, { useNewUrlParser: true });
@@ -200,17 +242,21 @@ async function populateSongs() {
 
         // Create Playlists
         const playlistsData = [
-            { name: "Rock Classics", ownerEmail: "kross@gmail.com", listens: 0, songs: [] },
-            { name: "My Pop Hits", ownerEmail: "kross@gmail.com", listens: 0, songs: [] },
-            { name: "Chill Vibes", ownerEmail: "kross_other@gmail.com", listens: 0, songs: [] },
-            { name: "Workout Mix", ownerEmail: "kross@gmail.com", listens: 0, songs: [] }
+            { name: "Rock Classics", ownerEmail: "kross@gmail.com", listens: 0 },
+            { name: "My Pop Hits", ownerEmail: "kross@gmail.com", listens: 0 },
+            { name: "Chill Vibes", ownerEmail: "kross_other@gmail.com", listens: 0 },
+            { name: "Workout Mix", ownerEmail: "kross@gmail.com", listens: 0 }
         ];
 
         const createdPlaylists = await Playlist.insertMany(playlistsData);
         console.log(`Inserted ${createdPlaylists.length} playlists`);
 
-        // Prepare Songs with Random Playlist Assignments
-        const songsWithPlaylists = songs.map(song => {
+        // Prepare Songs with Random Playlist Assignments and DURATIONS
+        const songsWithPlaylists = [];
+
+        for (let s = 0; s < songs.length; s++) {
+            let song = songs[s];
+
             const assignedPlaylists = [];
             // Randomly assign to 0-3 playlists
             const numAssignments = Math.floor(Math.random() * 4);
@@ -222,11 +268,21 @@ async function populateSongs() {
                     assignedPlaylists.push(shuffledPlaylists[i]._id);
                 }
             }
-            return {
+
+            // Fetch Duration
+            let duration = "0:00";
+            if (song.youTubeId) {
+                console.log(`Fetching duration for ${song.title} (${song.youTubeId})...`);
+                duration = await getYouTubeDuration(song.youTubeId);
+                console.log(`Duration: ${duration}`);
+            }
+
+            songsWithPlaylists.push({
                 ...song,
-                playlists: assignedPlaylists
-            };
-        });
+                playlists: assignedPlaylists,
+                duration: duration
+            });
+        }
 
         await Song.insertMany(songsWithPlaylists);
         console.log(`Inserted ${songsWithPlaylists.length} songs with playlist assignments`);
@@ -240,5 +296,3 @@ async function populateSongs() {
 }
 
 populateSongs();
-
-
