@@ -26,7 +26,6 @@ function PlaylistsScreen() {
     const { auth } = useContext(AuthContext);
     const [expandedPlaylists, setExpandedPlaylists] = useState({});
 
-    // Filtering & Sorting State
     const [filteredPlaylists, setFilteredPlaylists] = useState([]);
     const [searchPlaylistName, setSearchPlaylistName] = useState("");
     const [searchUserName, setSearchUserName] = useState("");
@@ -36,11 +35,9 @@ function PlaylistsScreen() {
     const [sortType, setSortType] = useState("listens-hi-lo");
     const hasInitialSorted = useRef(false);
 
-    // State Persistence
     const [wasModalOpen, setWasModalOpen] = useState(false);
     const [isUserFilterActive, setIsUserFilterActive] = useState(false);
 
-    // Play Playlist Modal State
     const [playingPlaylist, setPlayingPlaylist] = useState(null);
 
     useEffect(() => {
@@ -48,36 +45,43 @@ function PlaylistsScreen() {
     }, []);
 
     useEffect(() => {
-        if (!wasModalOpen) {
-            if (store.playlists) {
-                if (auth.loggedIn && auth.guestLoggedIn === false) {
-                    let initialList = store.playlists.filter(p => (p.ownerEmail === auth.user.email));
-                    if (!hasInitialSorted.current && initialList.length > 0) {
-                        const comparator = getComparator("listens-hi-lo");
-                        if (comparator) initialList.sort(comparator);
-                        hasInitialSorted.current = true;
-                    }
-                    setFilteredPlaylists(initialList);
-                    setIsUserFilterActive(true);
-                } else {
-                    setFilteredPlaylists(store.playlists);
-                    setIsUserFilterActive(false);
-                }
+        if (store.playlists) {
+            if (wasModalOpen) {
+                setWasModalOpen(false);
             }
-        } else {
-            setWasModalOpen(false);
-            if (store.playlists) {
-                if (isUserFilterActive) {
-                    let userItems = store.playlists.filter(p => (p.ownerEmail === auth.user.email));
 
-                    const comparator = getComparator(sortType);
-                    if (comparator) userItems.sort(comparator);
+            const hasSearch = searchPlaylistName || searchUserName || searchSongTitle || searchSongArtist || searchSongYear;
 
-                    setFilteredPlaylists(userItems);
+            if (hasSearch) {
+                handleSearch();
+            } else {
+                let listToRender;
+                let shouldBeUserFilter = isUserFilterActive;
+
+                if (auth.loggedIn && auth.guestLoggedIn === false) {
+                    if (!hasInitialSorted.current) {
+                        shouldBeUserFilter = true;
+                        listToRender = store.playlists.filter(p => p.ownerEmail === auth.user.email);
+                        const comparator = getComparator("listens-hi-lo");
+                        if (comparator) listToRender.sort(comparator);
+                        hasInitialSorted.current = true;
+                    } else if (isUserFilterActive) {
+                        listToRender = store.playlists.filter(p => p.ownerEmail === auth.user.email);
+                    } else {
+                        listToRender = [...store.playlists];
+                    }
                 } else {
-                    setFilteredPlaylists(store.playlists);
-                    handleSearch();
+                    listToRender = [...store.playlists];
+                    shouldBeUserFilter = false;
                 }
+
+                if (listToRender && hasInitialSorted.current) {
+                    const comparator = getComparator(sortType);
+                    if (comparator) listToRender.sort(comparator);
+                }
+
+                setFilteredPlaylists(listToRender);
+                setIsUserFilterActive(shouldBeUserFilter);
             }
         }
     }, [store.playlists]);
@@ -324,6 +328,7 @@ function PlaylistsScreen() {
                                                 !auth.guestLoggedIn && (
                                                     <Button
                                                         variant="contained"
+                                                        onClick={(e) => { e.stopPropagation(); store.copyPlaylist(playlist._id); }}
                                                         sx={{
                                                             bgcolor: '#388e3c', color: 'white', textTransform: 'none', borderRadius: 2,
                                                             minWidth: '50px', height: '30px', fontSize: '0.8rem',

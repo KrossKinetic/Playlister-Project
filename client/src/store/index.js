@@ -375,7 +375,48 @@ function GlobalStoreContextProvider(props) {
         }
     }
 
-    // THIS FUNCTION LOADS ALL THE ID, NAME PAIRS SO WE CAN LIST ALL THE LISTS
+    store.copyPlaylist = async function (id) {
+        let playlistToCopy = store.playlists.find(p => p._id === id);
+        if (!playlistToCopy) return;
+
+        let baseName = playlistToCopy.name;
+        let suffix = " (Copy)";
+        let newName = baseName + suffix;
+
+        while (store.playlists.some(p => p.name === newName && p.ownerEmail === auth.user.email)) {
+            newName += suffix;
+        }
+
+        const response = await storeRequestSender.createPlaylist(newName, 0, auth.user.email);
+
+        if (response.status === 201) {
+            let newPlaylist = response.data.playlist;
+
+            if (playlistToCopy.songs && playlistToCopy.songs.length > 0) {
+                const updatePromises = playlistToCopy.songs.map(song => {
+                    let newPlaylists = [...song.playlists, newPlaylist._id];
+
+                    let updatedSongData = {
+                        title: song.title,
+                        artist: song.artist,
+                        year: song.year,
+                        youTubeId: song.youTubeId,
+                        listens: song.listens,
+                        playlists: newPlaylists
+                    };
+
+                    return storeRequestSender.updateSong(song._id, updatedSongData);
+                });
+
+                await Promise.all(updatePromises);
+            }
+
+            store.loadPlaylists();
+            store.loadSongCatalog();
+        } else {
+            console.log("Failed to copy playlist");
+        }
+    }
 
     store.loadSongCatalog = async function () {
         const response = await storeRequestSender.getSongPairs();

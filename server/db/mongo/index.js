@@ -429,7 +429,7 @@ class MongoDatabaseManagerStore {
                 return { success: false, message: "User not found" };
             }
 
-            if (song.created_by !== user.email && (song.playlists === body.playlists || song.listens === body.listens)) {
+            if (song.created_by !== user.email && (song.playlists === body.playlists && song.listens === body.listens)) {
                 return { success: false, message: "Authentication error" };
             }
 
@@ -439,8 +439,6 @@ class MongoDatabaseManagerStore {
             song.artist = body.artist;
             song.year = body.year;
 
-            // Check if youtubeId changed, if so may need to update duration, but typically updates don't change core ID too often
-            // For now, let's keep it simple as originally requested.
             if (body.youTubeId && body.youTubeId !== song.youTubeId) {
                 song.youTubeId = body.youTubeId;
                 song.duration = await MongoDatabaseManagerStore.getYouTubeDuration(body.youTubeId);
