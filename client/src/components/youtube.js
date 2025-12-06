@@ -1,11 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import YouTube from 'react-youtube';
 import { Box } from '@mui/material';
+import Typography from '@mui/material/Typography';
 
-function YouTubePlayer({ playlist, currentSongIndex, setCurrentSongIndex, setPlayerRef }) {
-    console.log(playlist);
-    const song = playlist[currentSongIndex];
-    const videoId = song ? song.youTubeId : "";
+function YouTubePlayer({ playlist, currentSongIndex, setCurrentSongIndex, setPlayerRef, playerRef }) {
+    const [song, setSong] = useState(playlist[currentSongIndex]);
+    const [videoId, setVideoId] = useState(song ? song.youTubeId : "");
+
+    // State to track if the video is ready to be played (validated)
+    const [isVideoValid, setIsVideoValid] = useState(false);
+
+    // Ensure state updates when props change
+    React.useEffect(() => {
+        const newSong = playlist[currentSongIndex];
+        setSong(newSong);
+        setVideoId(newSong ? newSong.youTubeId : "");
+        setIsVideoValid(false);
+    }, [playlist, currentSongIndex]);
 
     const playerOptions = {
         height: '100%',
@@ -14,6 +25,37 @@ function YouTubePlayer({ playlist, currentSongIndex, setCurrentSongIndex, setPla
             autoplay: 1,
         },
     };
+
+    // Validate Video ID using noembed (public oEmbed proxy)
+    React.useEffect(() => {
+        let isMounted = true;
+
+        const checkVideoValidity = async () => {
+            if (!videoId) return;
+
+            try {
+                // Fetch oEmbed data
+                const response = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    console.log(`[YouTubePlayer] Video ${videoId} invalid: ${data.error}`);
+                    if (isMounted) handleInternalSongEnd();
+                } else {
+                    console.log(`[YouTubePlayer] Video ${videoId} valid: ${data.title}`);
+                    // Only start playing (render player) if valid
+                    if (isMounted) setIsVideoValid(true);
+                }
+            } catch (error) {
+                if (isMounted) setIsVideoValid(true);
+            }
+        };
+
+        checkVideoValidity();
+
+        return () => { isMounted = false; };
+    }, [videoId]);
+
 
     function onPlayerReady(event) {
         event.target.playVideo();
@@ -39,14 +81,20 @@ function YouTubePlayer({ playlist, currentSongIndex, setCurrentSongIndex, setPla
             width: '100%',
             aspectRatio: '640 / 330'
         }}>
-            <YouTube
-                videoId={videoId}
-                opts={playerOptions}
-                onReady={onPlayerReady}
-                onEnd={handleInternalSongEnd}
-                onError={handleInternalSongEnd}
-                style={{ height: '100%', width: '100%' }}
-            />
+            {isVideoValid ?
+                <YouTube
+                    key={videoId}
+                    videoId={videoId}
+                    opts={playerOptions}
+                    onReady={onPlayerReady}
+                    onEnd={handleInternalSongEnd}
+                    style={{ height: '100%', width: '100%' }}
+                />
+                :
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', backgroundColor: 'black', color: 'gray' }}>
+                    {videoId ? "Loading..." : "No Song"}
+                </Box>
+            }
         </Box>
     );
 }

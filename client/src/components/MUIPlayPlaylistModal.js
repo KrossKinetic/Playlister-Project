@@ -214,6 +214,7 @@ export default function MUIPlayPlaylistModal({ open, handleClose, playlist }) {
                                 currentSongIndex={currentSongIndex}
                                 setCurrentSongIndex={setCurrentSongIndex}
                                 setPlayerRef={setPlayer}
+                                playerRef={player}
                             />
                         </Box>
 
