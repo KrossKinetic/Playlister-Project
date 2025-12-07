@@ -70,6 +70,14 @@ class DatabaseManager {
     static updateSong = async (req, body) => {
         return MongoDatabaseManagerStore.updateSong(req, body)
     }
+
+    static updateSongListens = async (req) => {
+        return MongoDatabaseManagerStore.updateSongListens(req)
+    }
+
+    static updatePlaylistListeners = async (req) => {
+        return MongoDatabaseManagerStore.updatePlaylistListeners(req)
+    }
 }
 
 module.exports = DatabaseManager

@@ -19,5 +19,7 @@ router.put('/playlist/:id', auth.verify, StoreController.updatePlaylist)
 router.post('/song', auth.verify, StoreController.createSong)
 router.delete('/song/:id', auth.verify, StoreController.deleteSong)
 router.put('/song/:id', auth.verify, StoreController.updateSong)
+router.put('/playlistlisteners/:id', auth.verify, StoreController.updatePlaylistListeners)
+router.put('/songlistens/:id', auth.verify, StoreController.updateSongListens)
 
 module.exports = router

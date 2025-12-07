@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import YouTube from 'react-youtube';
 import { Box } from '@mui/material';
+import { GlobalStoreContext } from '../store';
 
 function YouTubePlayer({ playlist, currentSongIndex, setCurrentSongIndex, setPlayerRef }) {
+    const { store } = useContext(GlobalStoreContext);
     const [song, setSong] = useState(playlist[currentSongIndex]);
     const [videoId, setVideoId] = useState(song ? song.youTubeId : "");
 
@@ -15,6 +17,7 @@ function YouTubePlayer({ playlist, currentSongIndex, setCurrentSongIndex, setPla
         setSong(newSong);
         setVideoId(newSong ? newSong.youTubeId : "");
         setIsVideoValid(false);
+        store.updateSongListens(newSong._id);
     }, [playlist, currentSongIndex]);
 
     const playerOptions = {

@@ -18,6 +18,7 @@
 
 body {
   background-color: #fffff0;
+  overflow: hidden;
 }
 
 #root {

@@ -33,7 +33,7 @@ function PlaylistsScreen() {
     const [searchSongTitle, setSearchSongTitle] = useState("");
     const [searchSongArtist, setSearchSongArtist] = useState("");
     const [searchSongYear, setSearchSongYear] = useState("");
-    const [sortType, setSortType] = useState("listens-hi-lo");
+    const [sortType, setSortType] = useState("listeners-hi-lo");
     const hasInitialSorted = useRef(false);
 
     const [wasModalOpen, setWasModalOpen] = useState(false);
@@ -41,6 +41,7 @@ function PlaylistsScreen() {
 
     const [playingPlaylist, setPlayingPlaylist] = useState(null);
     const [editingPlaylist, setEditingPlaylist] = useState(null);
+    const [playlistToDelete, setPlaylistToDelete] = useState(null);
 
     useEffect(() => {
         store.loadPlaylists();
@@ -65,7 +66,7 @@ function PlaylistsScreen() {
                     if (!hasInitialSorted.current) {
                         shouldBeUserFilter = true;
                         listToRender = store.playlists.filter(p => p.ownerEmail === auth.user.email);
-                        const comparator = getComparator("listens-hi-lo");
+                        const comparator = getComparator("listeners-hi-lo");
                         if (comparator) listToRender.sort(comparator);
                         hasInitialSorted.current = true;
                     } else if (isUserFilterActive) {
@@ -78,7 +79,7 @@ function PlaylistsScreen() {
                     shouldBeUserFilter = false;
                 }
 
-                if (listToRender && hasInitialSorted.current) {
+                if (listToRender) {
                     const comparator = getComparator(sortType);
                     if (comparator) listToRender.sort(comparator);
                 }
@@ -101,17 +102,23 @@ function PlaylistsScreen() {
         setWasModalOpen(true);
     };
 
-    const handleDeletePlaylist = (id, event) => {
+    const handleDeletePlaylist = (playlist, event) => {
         event.stopPropagation();
-        store.markListForDeletion(id);
+        setPlaylistToDelete(playlist);
     };
 
     const handleConfirmDelete = () => {
-        store.deleteMarkedList();
+        store.deleteList(playlistToDelete._id);
+        setPlaylistToDelete(null);
         setWasModalOpen(true);
     };
 
+    const handleCloseDeleteModal = () => {
+        setPlaylistToDelete(null);
+    };
+
     const handlePlayPlaylist = (playlist) => {
+        store.updatePlaylistListeners(playlist._id);
         setPlayingPlaylist(playlist);
     };
 
@@ -129,8 +136,8 @@ function PlaylistsScreen() {
 
     const getComparator = (type) => {
         switch (type) {
-            case "listens-hi-lo": return (a, b) => b.listens - a.listens;
-            case "listens-lo-hi": return (a, b) => a.listens - b.listens;
+            case "listeners-hi-lo": return (a, b) => (b.listeners_user?.length || 0) - (a.listeners_user?.length || 0);
+            case "listeners-lo-hi": return (a, b) => (a.listeners_user?.length || 0) - (b.listeners_user?.length || 0);
             case "name-a-z": return (a, b) => a.name.localeCompare(b.name);
             case "name-z-a": return (a, b) => b.name.localeCompare(a.name);
             case "owner-a-z": return (a, b) => (a.username || "").localeCompare(b.username || "");
@@ -175,7 +182,7 @@ function PlaylistsScreen() {
         setSearchSongTitle("");
         setSearchSongArtist("");
         setSearchSongYear("");
-        setSortType("listens-hi-lo");
+        setSortType("listeners-hi-lo");
 
         let defaultList;
         if (auth.loggedIn && auth.guestLoggedIn === false) {
@@ -185,7 +192,7 @@ function PlaylistsScreen() {
             defaultList = [...store.playlists];
             setIsUserFilterActive(false);
         }
-        const comparator = getComparator("listens-hi-lo");
+        const comparator = getComparator("listeners-hi-lo");
         if (comparator) {
             defaultList.sort(comparator);
         }
@@ -257,8 +264,8 @@ function PlaylistsScreen() {
                             label="Sort By"
                             onChange={(e) => handleSort(e.target.value)}
                         >
-                            <MenuItem value="listens-hi-lo">Listens (High-Low)</MenuItem>
-                            <MenuItem value="listens-lo-hi">Listens (Low-High)</MenuItem>
+                            <MenuItem value="listeners-hi-lo">Listeners (High-Low)</MenuItem>
+                            <MenuItem value="listeners-lo-hi">Listeners (Low-High)</MenuItem>
                             <MenuItem value="name-a-z">Name (A-Z)</MenuItem>
                             <MenuItem value="name-z-a">Name (Z-A)</MenuItem>
                             <MenuItem value="owner-a-z">User (A-Z)</MenuItem>
@@ -299,7 +306,7 @@ function PlaylistsScreen() {
                                                 <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{playlist.name}</Typography>
                                                 <Typography variant="body2" color="text.secondary">{playlist?.username ?? "Username"}</Typography>
                                                 <Typography variant="body2" sx={{ fontWeight: 'bold', }} color="text.secondary">
-                                                    {playlist.listens} Listeners
+                                                    {playlist.listeners_user?.length || 0} Listeners
                                                 </Typography>
                                                 <Typography variant="body2" sx={{ fontWeight: 'bold', }} color="text.secondary">
                                                     {playlist.songs.length} Songs
@@ -314,7 +321,7 @@ function PlaylistsScreen() {
                                                     <>
                                                         <Button
                                                             variant="contained"
-                                                            onClick={(e) => handleDeletePlaylist(playlist._id, e)}
+                                                            onClick={(e) => handleDeletePlaylist(playlist, e)}
                                                             sx={{
                                                                 bgcolor: '#d32f2f', color: 'white', textTransform: 'none', borderRadius: 2,
                                                                 minWidth: '60px', height: '30px', fontSize: '0.8rem',
@@ -417,7 +424,12 @@ function PlaylistsScreen() {
                     }
                 </Box>
             </Box>
-            <MUIDeleteModal onConfirm={handleConfirmDelete} />
+            <MUIDeleteModal
+                open={playlistToDelete !== null}
+                playlistName={playlistToDelete ? playlistToDelete.name : ''}
+                onConfirm={handleConfirmDelete}
+                onClose={handleCloseDeleteModal}
+            />
             <MUIPlayPlaylistModal
                 open={playingPlaylist !== null}
                 handleClose={handleClosePlayModal}

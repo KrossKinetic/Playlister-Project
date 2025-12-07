@@ -251,7 +251,7 @@ function GlobalStoreContextProvider(props) {
                         listNameActive: false,
                         listIdMarkedForDeletion: null,
                         listMarkedForDeletion: null,
-                        songCatalog: prevStore.songCatalog,
+                        songCatalog: prevStore.songCatalog, // Being Used
                         playlists: payload // updated
                     };
                 }
@@ -291,48 +291,24 @@ function GlobalStoreContextProvider(props) {
         }
     }
 
-    // THIS FUNCTION PROCESSES CHANGING A LIST NAME
-    store.changeListName = function (id, newName) {
-        // GET THE LIST
-        async function asyncChangeListName(id) {
-            let response = await storeRequestSender.getPlaylistById(id);
-            if (response.data.success) {
-                let playlist = response.data.playlist;
-                playlist.name = newName;
-                async function updateList(playlist) {
-                    response = await storeRequestSender.updatePlaylistById(playlist._id, playlist);
-                    if (response.data.success) {
-                        async function getListPairs(playlist) {
-                            response = await storeRequestSender.getPlaylistPairs();
-                            if (response.data.success) {
-                                let pairsArray = response.data.idNamePairs;
-                                storeReducer({
-                                    type: GlobalStoreActionType.CHANGE_LIST_NAME,
-                                    payload: {
-                                        idNamePairs: pairsArray,
-                                        playlist: playlist
-                                    }
-                                });
-                                store.setCurrentList(id);
-                            }
-                        }
-                        getListPairs(playlist);
-                    }
-                }
-                updateList(playlist);
-            }
+    store.updatePlaylistListeners = async function (playlist_id) {
+        const response = await storeRequestSender.updatePlaylistListeners(playlist_id);
+        if (response.data.success) {
+            store.loadPlaylists();
+            return "success";
+        } else {
+            return response.data.errorMessage;
         }
-        asyncChangeListName(id);
     }
 
-    // THIS FUNCTION PROCESSES CLOSING THE CURRENTLY LOADED LIST
-    store.closeCurrentList = function () {
-        storeReducer({
-            type: GlobalStoreActionType.CLOSE_CURRENT_LIST,
-            payload: {}
-        });
-        tps.clearAllTransactions();
-        history.push("/");
+    store.updateSongListens = async function (song_id) {
+        const response = await storeRequestSender.updateSongListens(song_id);
+        if (response.data.success) {
+            store.loadSongCatalog();
+            return "success";
+        } else {
+            return response.data.errorMessage;
+        }
     }
 
     // THIS FUNCTION CREATES A NEW LIST
@@ -361,7 +337,7 @@ function GlobalStoreContextProvider(props) {
             newListName = "Untitled " + nextNumber;
         }
 
-        const response = await storeRequestSender.createPlaylist(newListName, 0, auth.user.email);
+        const response = await storeRequestSender.createPlaylist(newListName, auth.user.email);
         console.log("createNewList response: " + response);
         if (response.status === 201) {
             tps.clearAllTransactions();
@@ -389,23 +365,14 @@ function GlobalStoreContextProvider(props) {
             newName += suffix;
         }
 
-        const response = await storeRequestSender.createPlaylist(newName, 0, auth.user.email);
+        const response = await storeRequestSender.createPlaylist(newName, auth.user.email);
 
         if (response.status === 201) {
             let newPlaylist = response.data.playlist;
 
             if (playlistToCopy.songs && playlistToCopy.songs.length > 0) {
-                // The new playlist needs to reference these songs.
-                // Since songs are shared references now (normalized?), we just need to copy the IDs.
-                // Wait, if we are copying a playlist, do we copy the song *documents* or just the references?
-                // The original code seemingly just added the new playlist ID to the *existing* song's `playlists` array.
-                // This implies songs were shared.
-                // So now we just need to set the `songs` array of the new playlist to match the old playlist's song IDs.
-
                 let songIds = playlistToCopy.songs.map(s => s._id);
                 newPlaylist.songs = songIds;
-
-                // Update the new playlist with these songs
                 await storeRequestSender.updatePlaylistById(newPlaylist._id, newPlaylist);
             }
 
@@ -445,54 +412,6 @@ function GlobalStoreContextProvider(props) {
         if (!response.data.success) {
             console.log("FAILED TO DELETE LIST");
         }
-    }
-    store.deleteMarkedList = function () {
-        store.deleteList(store.listIdMarkedForDeletion);
-        store.hideModals();
-    }
-
-    store.showEditSongModal = (songIndex, songToEdit) => {
-        storeReducer({
-            type: GlobalStoreActionType.EDIT_SONG,
-            payload: { currentSongIndex: songIndex, currentSong: songToEdit }
-        });
-    }
-    store.hideModals = () => {
-        auth.errorMessage = null;
-        storeReducer({
-            type: GlobalStoreActionType.HIDE_MODALS,
-            payload: {}
-        });
-    }
-    store.isDeleteListModalOpen = () => {
-        return store.currentModal === CurrentModal.DELETE_LIST;
-    }
-    store.isEditSongModalOpen = () => {
-        return store.currentModal === CurrentModal.EDIT_SONG;
-    }
-    store.isErrorModalOpen = () => {
-        return store.currentModal === CurrentModal.ERROR;
-    }
-
-    store.setCurrentList = async function (id) {
-        let response = await storeRequestSender.getPlaylistById(id);
-        if (response.data.success) {
-            let playlist = response.data.playlist;
-
-            response = await storeRequestSender.updatePlaylistById(playlist._id, playlist);
-            console.log(playlist)
-            if (response.data.success) {
-                storeReducer({
-                    type: GlobalStoreActionType.SET_CURRENT_LIST,
-                    payload: playlist
-                });
-                history.push("/playlist/" + playlist._id);
-            }
-        }
-    }
-
-    store.getPlaylistSize = function () {
-        return store.currentList.songs.length;
     }
 
     store.addNewSong = function () {

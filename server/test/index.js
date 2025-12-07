@@ -242,10 +242,10 @@ async function populateSongs() {
 
         // Create Playlists (initially empty songs)
         const playlistsData = [
-            { name: "Rock Classics", ownerEmail: "kross@gmail.com", listens: 0, songs: [] },
-            { name: "My Pop Hits", ownerEmail: "kross@gmail.com", listens: 0, songs: [] },
-            { name: "Chill Vibes", ownerEmail: "kross_other@gmail.com", listens: 0, songs: [] },
-            { name: "Workout Mix", ownerEmail: "kross@gmail.com", listens: 0, songs: [] }
+            { name: "Rock Classics", ownerEmail: "kross@gmail.com", listeners_user: [], songs: [] },
+            { name: "My Pop Hits", ownerEmail: "kross@gmail.com", listeners_user: [], songs: [] },
+            { name: "Chill Vibes", ownerEmail: "kross_other@gmail.com", listeners_user: [], songs: [] },
+            { name: "Workout Mix", ownerEmail: "kross@gmail.com", listeners_user: [], songs: [] }
         ];
 
         // Insert empty playlists first to get IDs? Or just create docs?

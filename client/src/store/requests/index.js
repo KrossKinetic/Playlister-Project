@@ -29,13 +29,13 @@ export async function api(path, options = {}) {
 // WORK, AND SOME REQUIRE DATA, WHICH WE WE WILL FORMAT HERE, FOR WHEN
 // WE NEED TO PUT THINGS INTO THE DATABASE OR IF WE HAVE SOME
 // CUSTOM FILTERS FOR QUERIES
-export async function createPlaylist(newListName, listens, userEmail) {
+export async function createPlaylist(newListName, userEmail) {
     const res = await api('/playlist/', { // This sends you the promise for the Response object
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             name: newListName,
-            listens: listens,
+            listeners_user: [],
             ownerEmail: userEmail
         })
     });
@@ -178,6 +178,34 @@ export async function getPlaylists() {
     return { data: data, status: res.status, statusText: res.statusText };
 }
 
+export async function updatePlaylistListeners(playlist_id) {
+    const res = await api(`/playlistlisteners/${playlist_id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' }
+    });
+
+    let data = { success: false };
+    try {
+        data = await res.json();
+    } catch (err) { }
+
+    return { data: data, status: res.status, statusText: res.statusText };
+}
+
+export async function updateSongListens(song_id) {
+    const res = await api(`/songlistens/${song_id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' }
+    });
+
+    let data = { success: false };
+    try {
+        data = await res.json();
+    } catch (err) { }
+
+    return { data: data, status: res.status, statusText: res.statusText };
+}
+
 const apis = {
     createPlaylist,
     deletePlaylistById,
@@ -188,6 +216,8 @@ const apis = {
     createSong,
     deleteSong,
     updateSong,
-    getPlaylists
+    getPlaylists,
+    updatePlaylistListeners,
+    updateSongListens
 }
 export default apis

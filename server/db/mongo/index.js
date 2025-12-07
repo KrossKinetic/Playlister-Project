@@ -463,6 +463,66 @@ class MongoDatabaseManagerStore {
             return { success: false, message: err.message };
         }
     }
+
+    static async updatePlaylistListeners(req) {
+        try {
+            const playlist = await Playlist.findById(req.params.id);
+            if (!playlist) {
+                return { success: false, message: "Playlist not found" };
+            }
+
+            if (req.userId === "guest_user_id") {
+                if (playlist.listeners_user.includes(req.userId)) {
+                    return { success: true, message: "Guest user already in listeners" };
+                }
+                playlist.listeners_user.push(req.userId);
+                await playlist.save();
+                return { success: true, playlist: playlist };
+            }
+
+            const user = await User.findOne({ _id: req.userId });
+            if (!user) {
+                return { success: false, message: "User not found" };
+            }
+
+            console.log("Updating listeners:", playlist);
+
+            if (playlist.listeners_user.includes(user._id)) {
+                return { success: true, message: "User already in listeners" };
+            }
+
+            playlist.listeners_user.push(user._id);
+
+            console.log("Updated listeners:", playlist);
+
+            await playlist.save();
+            return { success: true, playlist: playlist };
+        } catch (err) {
+            console.log("Error updating listeners:", err);
+
+            return { success: false, message: err.message };
+        }
+    }
+
+    static async updateSongListens(req) {
+        try {
+            const song = await Song.findById(req.params.id);
+            if (!song) {
+                return { success: false, message: "Song not found" };
+            }
+
+            song.listens++;
+
+            console.log("Updated listens:", song);
+
+            await song.save();
+            return { success: true, song: song };
+        } catch (err) {
+            console.log("Error updating listens:", err);
+
+            return { success: false, message: err.message };
+        }
+    }
 }
 
 module.exports = {

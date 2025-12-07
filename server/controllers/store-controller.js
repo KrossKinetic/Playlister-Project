@@ -131,10 +131,6 @@ getSongPairs = async (req, res) => {
         success: true,
         songs: response.songs
     });
-    return res.status(200).json({
-        success: true,
-        songs: response.songs
-    });
 }
 
 createSong = async (req, res) => {
@@ -269,6 +265,49 @@ updatePlaylist = async (req, res) => {
         playlist: response.playlist
     });
 }
+
+updatePlaylistListeners = async (req, res) => {
+    if (auth.verifyUser(req) === null) {
+        return res.status(400).json({
+            errorMessage: 'UNAUTHORIZED'
+        })
+    }
+    const response = await DatabaseManager.updatePlaylistListeners(req);
+
+    if (!response || !response.success) {
+        return res.status(400).json({
+            success: false,
+            errorMessage: response?.message || 'Failed to update playlist listeners'
+        });
+    }
+
+    return res.status(200).json({
+        success: true,
+        playlist: response.playlist
+    });
+}
+
+updateSongListens = async (req, res) => {
+    if (auth.verifyUser(req) === null) {
+        return res.status(400).json({
+            errorMessage: 'UNAUTHORIZED'
+        })
+    }
+    const response = await DatabaseManager.updateSongListens(req);
+
+    if (!response || !response.success) {
+        return res.status(400).json({
+            success: false,
+            errorMessage: response?.message || 'Failed to update song listens'
+        });
+    }
+
+    return res.status(200).json({
+        success: true,
+        song: response.song
+    });
+}
+
 module.exports = {
     createPlaylist,
     deletePlaylist,
@@ -279,5 +318,7 @@ module.exports = {
     updatePlaylist,
     createSong,
     deleteSong,
-    updateSong
+    updateSong,
+    updatePlaylistListeners,
+    updateSongListens
 }

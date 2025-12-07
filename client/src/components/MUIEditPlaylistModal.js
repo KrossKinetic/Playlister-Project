@@ -127,11 +127,34 @@ export default function MUIEditPlaylistModal({ open, handleClose, playlist }) {
                                 >
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <Typography variant="body2" sx={{ fontWeight: 'inherit' }}>
-                                            {index + 1}. {song.title}
+                                            {index + 1}. {song.title} by {song.artist} ({song.year})
                                         </Typography>
-                                        <Typography variant="caption" sx={{ color: '#888' }}>
-                                            {song.artist}
-                                        </Typography>
+                                        <Box>
+                                            <Button
+                                                variant="contained"
+                                                sx={{
+                                                    bgcolor: '#2E7D32',
+                                                    color: 'white',
+                                                    textTransform: 'none',
+                                                    '&:hover': { bgcolor: '#1B5E20' },
+                                                    mr: 1
+                                                }}
+                                            >
+                                                Duplicate
+                                            </Button>
+                                            <Button
+                                                variant="contained"
+                                                sx={{
+                                                    bgcolor: '#2E7D32',
+                                                    color: 'white',
+                                                    textTransform: 'none',
+                                                    '&:hover': { bgcolor: '#1B5E20' }
+                                                }}
+                                            >
+                                                Remove
+                                            </Button>
+                                        </Box>
+
                                     </Box>
                                 </Box>
                             ))}

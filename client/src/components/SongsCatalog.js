@@ -33,7 +33,7 @@ function SongsCatalog() {
     const [isSongPlaying, setIsSongPlaying] = useState(false);
     const [currentSongForPlaying, setCurrentSongForPlaying] = useState(0);
     const [anchorEl, setAnchorEl] = useState(null);
-    const [wasModalOpen, setWasModalOpen] = useState(false);
+    const [maintainFilterSort, setMaintainFilterSort] = useState(false);
     const [isUserFilterActive, setIsUserFilterActive] = useState(false);
     const isMenuOpen = Boolean(anchorEl);
     const [errorToastState, setErrorToastState] = useState({
@@ -79,16 +79,22 @@ function SongsCatalog() {
     }, [auth]);
 
     useEffect(() => {
-        if (!wasModalOpen) {
+        if (!maintainFilterSort) {
+            let songs = store.songCatalog;
             if (auth.loggedIn && auth.guestLoggedIn === false) {
-                setFilteredSongs(store.songCatalog.filter(s => (s.created_by === auth.user.email)));
+                songs = store.songCatalog.filter(s => (s.created_by === auth.user.email));
                 setIsUserFilterActive(true);
             } else {
-                setFilteredSongs(store.songCatalog);
                 setIsUserFilterActive(false);
             }
+
+            const comparator = getComparator(sortType);
+            if (comparator) {
+                songs = [...songs].sort(comparator);
+            }
+            setFilteredSongs(songs);
         } else {
-            setWasModalOpen(false);
+            setMaintainFilterSort(false);
             if (isUserFilterActive) {
                 let tempFilter = store.songCatalog.filter(s => (s.created_by === auth.user.email));
                 const comparator = getComparator(sortType);
@@ -136,7 +142,11 @@ function SongsCatalog() {
 
     const handleSongClick = (song) => {
         setIsSongPlaying(true);
-        setCurrentSongForPlaying(song.youTubeId);
+        if (currentSongForPlaying !== song.youTubeId) {
+            setMaintainFilterSort(true);
+            store.updateSongListens(song._id);
+            setCurrentSongForPlaying(song.youTubeId);
+        }
     };
 
     const handleSort = (type) => {
@@ -192,7 +202,7 @@ function SongsCatalog() {
 
     const handleMenuOpenAdd = (event) => {
         setAnchorElAdd(event.currentTarget);
-        setWasModalOpen(true);
+        setMaintainFilterSort(true);
     };
 
     const handleMenuCloseAdd = () => {
@@ -239,7 +249,7 @@ function SongsCatalog() {
 
     const handleConfirmRemoveSong = () => {
         store.removeSong(currentSong._id);
-        setWasModalOpen(true);
+        setMaintainFilterSort(true);
         setIsRemoveSongModalOpen(false);
     };
 
@@ -259,7 +269,7 @@ function SongsCatalog() {
         } else {
             setEditSongModalError(result);
         }
-        setWasModalOpen(true);
+        setMaintainFilterSort(true);
     };
 
     const handleCancelEditSong = () => {
@@ -277,7 +287,7 @@ function SongsCatalog() {
         } else {
             setCreateSongModalError(result);
         }
-        setWasModalOpen(true);
+        setMaintainFilterSort(true);
     };
 
     const handleCancelCreateSong = () => {

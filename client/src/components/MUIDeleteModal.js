@@ -1,5 +1,3 @@
-import { useContext } from 'react'
-import GlobalStoreContext from '../store';
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
 import Typography from '@mui/material/Typography';
@@ -20,7 +18,7 @@ const style = {
 };
 
 const headerStyle = {
-    bgcolor: '#2E7D32', // Darker green for header to match SongModal
+    bgcolor: '#2E7D32',
     color: 'white',
     p: 3,
     textAlign: 'center',
@@ -54,29 +52,12 @@ const buttonStyle = {
     mx: 2
 };
 
-export default function MUIDeleteModal({ onConfirm }) {
-    const { store } = useContext(GlobalStoreContext);
-    let name = "";
-    if (store.listMarkedForDeletion) {
-        name = store.listMarkedForDeletion.name;
-    }
-
-    function handleDeleteList(event) {
-        if (onConfirm) {
-            onConfirm();
-        } else {
-            store.deleteMarkedList();
-        }
-    }
-
-    function handleCloseModal(event) {
-        store.hideModals();
-    }
+export default function MUIDeleteModal({ open, playlistName, onConfirm, onClose }) {
 
     return (
         <Modal
-            open={store.listMarkedForDeletion !== null}
-            onClose={handleCloseModal}
+            open={open}
+            onClose={onClose}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
         >
@@ -86,7 +67,7 @@ export default function MUIDeleteModal({ onConfirm }) {
                 </Box>
                 <Box sx={bodyStyle}>
                     <Typography variant="h5" component="div" sx={{ mb: 2, color: '#333' }}>
-                        Are you sure you want to delete the <b>{name}</b> playlist?
+                        Are you sure you want to delete the <b>{playlistName}</b> playlist?
                     </Typography>
                     <Typography variant="body1" sx={{ mb: 4, color: '#333', fontWeight: 'bold' }}>
                         This action cannot be undone.
@@ -95,7 +76,7 @@ export default function MUIDeleteModal({ onConfirm }) {
                         <Button
                             variant="contained"
                             sx={buttonStyle}
-                            onClick={handleDeleteList}
+                            onClick={onConfirm}
                         >
                             Confirm
                         </Button>
@@ -108,7 +89,7 @@ export default function MUIDeleteModal({ onConfirm }) {
                                     bgcolor: '#616161',
                                 }
                             }}
-                            onClick={handleCloseModal}
+                            onClick={onClose}
                         >
                             Cancel
                         </Button>
