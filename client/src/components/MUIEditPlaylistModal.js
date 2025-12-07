@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import GlobalStoreContext from '../store';
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
 import Typography from '@mui/material/Typography';
@@ -71,6 +72,7 @@ const songItemStyle = {
 };
 
 export default function MUIEditPlaylistModal({ open, handleClose, playlist }) {
+    const { store } = useContext(GlobalStoreContext);
     if (!playlist) return null;
 
     return (
@@ -106,18 +108,59 @@ export default function MUIEditPlaylistModal({ open, handleClose, playlist }) {
                                     </Typography>
                                 </Box>
                             </Box>
-                            <Button
-                                onClick={handleClose}
-                                variant="contained"
-                                sx={{
-                                    bgcolor: '#2E7D32',
-                                    color: 'white',
-                                    textTransform: 'none',
-                                    '&:hover': { bgcolor: '#1B5E20' }
-                                }}
-                            >
-                                Close
-                            </Button>
+                            <Box sx={{ display: 'flex', gap: 1 }}>
+                                <Button
+                                    disabled={!store.canAddNewSong()}
+                                    onClick={store.addNewSong}
+                                    variant="contained"
+                                    sx={{
+                                        bgcolor: '#2E7D32',
+                                        color: 'white',
+                                        textTransform: 'none',
+                                        '&:hover': { bgcolor: '#1B5E20' }
+                                    }}
+                                >
+                                    + Add Song
+                                </Button>
+                                <Button
+                                    disabled={!store.canUndo()}
+                                    onClick={store.undo}
+                                    variant="contained"
+                                    sx={{
+                                        bgcolor: '#2E7D32',
+                                        color: 'white',
+                                        textTransform: 'none',
+                                        '&:hover': { bgcolor: '#1B5E20' }
+                                    }}
+                                >
+                                    Undo
+                                </Button>
+                                <Button
+                                    disabled={!store.canRedo()}
+                                    onClick={store.redo}
+                                    variant="contained"
+                                    sx={{
+                                        bgcolor: '#2E7D32',
+                                        color: 'white',
+                                        textTransform: 'none',
+                                        '&:hover': { bgcolor: '#1B5E20' }
+                                    }}
+                                >
+                                    Redo
+                                </Button>
+                                <Button
+                                    onClick={handleClose}
+                                    variant="contained"
+                                    sx={{
+                                        bgcolor: '#2E7D32',
+                                        color: 'white',
+                                        textTransform: 'none',
+                                        '&:hover': { bgcolor: '#1B5E20' }
+                                    }}
+                                >
+                                    Close
+                                </Button>
+                            </Box>
                         </Box>
                         <Box sx={{ overflowY: 'auto', flexGrow: 1, py: 1 }}>
                             {playlist.songs && playlist.songs.map((song, index) => (

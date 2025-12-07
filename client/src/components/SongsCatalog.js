@@ -248,7 +248,7 @@ function SongsCatalog() {
     };
 
     const handleConfirmRemoveSong = () => {
-        store.removeSong(currentSong._id);
+        store.deleteSong(currentSong._id);
         setMaintainFilterSort(true);
         setIsRemoveSongModalOpen(false);
     };
@@ -258,7 +258,7 @@ function SongsCatalog() {
     };
 
     const handleConfirmEditSong = async (title, artist, year, youTubeId) => {
-        const result = await store.updateSong(currentSong._id, {
+        const result = await store.updateSongDetails(currentSong._id, {
             title: title,
             artist: artist,
             year: year,
