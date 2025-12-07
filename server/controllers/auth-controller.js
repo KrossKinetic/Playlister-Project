@@ -237,23 +237,14 @@ registerUser = async (req, res) => {
 
         console.log("new user saved: " + savedUser._id);
 
-        const token = auth.signToken(savedUser._id);
-        console.log("token:" + token);
-
-        await res.cookie("token", token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "none"
-        }).status(200).json({
+        return res.status(200).json({
             success: true,
             user: {
                 username: savedUser.username,
                 email: savedUser.email,
                 avatarPng: savedUser.avatarPng
             }
-        })
-
-        console.log("token sent");
+        });
 
     } catch (err) {
         console.error(err);

@@ -10,6 +10,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
+import RepeatIcon from '@mui/icons-material/Repeat';
 import YouTubePlayer from './youtube';
 
 const style = {
@@ -113,15 +114,25 @@ const controlsStyle = {
 
 export default function MUIPlayPlaylistModal({ open, handleClose, playlist }) {
     const [currentSongIndex, setCurrentSongIndex] = useState(0);
+    const [videoId, setVideoId] = useState(null);
     const [player, setPlayer] = useState(null);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [isRepeat, setIsRepeat] = useState(false);
 
     useEffect(() => {
-        if (open) {
-            setCurrentSongIndex(0);
+        if (open && playlist && playlist.songs && playlist.songs.length > 0) {
+            setCurrentSongIndex(0); // Reset to first song when modal opens
+            setVideoId(playlist.songs[0].youTubeId); // Set videoId for the first song
             setIsPlaying(true);
+            store.updatePlaylistLastAccessed(playlist._id);
         }
-    }, [open]);
+    }, [open, playlist]);
+
+    useEffect(() => {
+        if (playlist && playlist.songs && playlist.songs.length > 0) {
+            setVideoId(playlist.songs[currentSongIndex].youTubeId);
+        }
+    }, [currentSongIndex, playlist]);
 
     const handleSkipPrevious = () => {
         let newIndex = currentSongIndex - 1;
@@ -215,6 +226,7 @@ export default function MUIPlayPlaylistModal({ open, handleClose, playlist }) {
                                 setCurrentSongIndex={setCurrentSongIndex}
                                 setPlayerRef={setPlayer}
                                 playerRef={player}
+                                repeat={isRepeat}
                             />
                         </Box>
 
@@ -227,6 +239,9 @@ export default function MUIPlayPlaylistModal({ open, handleClose, playlist }) {
                             </Typography>
 
                             <Box sx={controlsStyle}>
+                                <IconButton onClick={() => setIsRepeat(!isRepeat)} sx={{ color: isRepeat ? '#6a5acd' : '#555', bgcolor: isRepeat ? '#e8f5e9' : 'transparent', '&:hover': { color: '#6a5acd', bgcolor: '#e8f5e9' } }}>
+                                    <RepeatIcon sx={{ fontSize: 28 }} />
+                                </IconButton>
                                 <IconButton onClick={handleSkipPrevious} sx={{ color: '#555', '&:hover': { color: '#6a5acd', bgcolor: '#e8f5e9' } }}>
                                     <SkipPreviousIcon sx={{ fontSize: 32 }} />
                                 </IconButton>

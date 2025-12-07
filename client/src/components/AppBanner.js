@@ -58,10 +58,6 @@ export default function AppBanner() {
         handleMenuClose();
     }
 
-    const handleHouseClick = () => {
-        store.closeCurrentList();
-    }
-
     const handleHouseClickGuest = () => {
         auth.logoutUser();
     }
@@ -163,9 +159,9 @@ export default function AppBanner() {
                             auth.guestLoggedIn ? (
                                 <Link onClick={handleHouseClickGuest} style={{ textDecoration: 'none', color: 'white' }} to='/'><HomeIcon /></Link>
                             ) : auth.loggedIn ? (
-                                <Link onClick={handleHouseClick} style={{ textDecoration: 'none', color: 'white' }} to='/playlists'><HomeIcon /></Link>
+                                <Link style={{ textDecoration: 'none', color: 'white' }} to='/playlists'><HomeIcon /></Link>
                             ) : (
-                                <Link onClick={handleHouseClick} style={{ textDecoration: 'none', color: 'white' }} to='/'><HomeIcon /></Link>
+                                <Link style={{ textDecoration: 'none', color: 'white' }} to='/'><HomeIcon /></Link>
                             )
                         }
                         {

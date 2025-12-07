@@ -180,6 +180,34 @@ class MongoDatabaseManagerStore {
         }
     }
 
+    static updatePlaylistListeners(playlistId, listeners_user) {
+        Playlist.findById(playlistId, (err, playlist) => {
+            if (err) throw err;
+            playlist.listeners_user = listeners_user;
+            Playlist.updateOne({ _id: playlistId }, playlist, (err, data) => {
+                if (err) throw err;
+            });
+        });
+    }
+
+    static updatePlaylistLastAccessed(playlistId) {
+        Playlist.findById(playlistId, (err, playlist) => {
+            if (err) {
+                console.error("Error finding playlist for updatePlaylistLastAccessed:", err);
+                return;
+            };
+            if (!playlist) return;
+
+            playlist.lastAccessed = Date.now();
+            Playlist.updateOne({ _id: playlistId }, playlist, (err, data) => {
+                if (err) {
+                    console.error("Error updating playlist lastAccessed:", err);
+                    throw err;
+                }
+            });
+        });
+    }
+
 
     // Get playlist
     static async getPlaylists() {

@@ -3,7 +3,7 @@ import YouTube from 'react-youtube';
 import { Box } from '@mui/material';
 import { GlobalStoreContext } from '../store';
 
-function YouTubePlayer({ playlist, currentSongIndex, setCurrentSongIndex, setPlayerRef }) {
+function YouTubePlayer({ playlist, currentSongIndex, setCurrentSongIndex, setPlayerRef, repeat }) {
     const { store } = useContext(GlobalStoreContext);
     const [song, setSong] = useState(playlist[currentSongIndex]);
     const [videoId, setVideoId] = useState(song ? song.youTubeId : "");
@@ -62,10 +62,13 @@ function YouTubePlayer({ playlist, currentSongIndex, setCurrentSongIndex, setPla
             let nextIndex = currentSongIndex + 1;
 
             if (nextIndex >= playlist.length) {
-                nextIndex = 0;
+                if (repeat) {
+                    nextIndex = 0;
+                    setCurrentSongIndex(nextIndex);
+                }
+            } else {
+                setCurrentSongIndex(nextIndex);
             }
-
-            setCurrentSongIndex(nextIndex);
         }
     }
 

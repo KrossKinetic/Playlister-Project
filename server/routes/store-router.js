@@ -22,4 +22,6 @@ router.put('/song/:id', auth.verify, StoreController.updateSong)
 router.put('/playlistlisteners/:id', auth.verify, StoreController.updatePlaylistListeners)
 router.put('/songlistens/:id', auth.verify, StoreController.updateSongListens)
 
+router.put('/playlistLastAccessed/:id', StoreController.updatePlaylistLastAccessed);
+
 module.exports = router

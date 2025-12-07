@@ -203,6 +203,7 @@ const apis = {
     updateSong,
     getPlaylists,
     updatePlaylistListeners,
-    updateSongListens
+    updateSongListens,
+    updatePlaylistLastAccessed
 }
 export default apis

@@ -163,16 +163,13 @@ function AuthContextProvider(props) {
                 authReducer({
                     type: AuthActionType.REGISTER_USER,
                     payload: {
-                        user: response.data.user,
-                        loggedIn: true,
+                        user: null,
+                        loggedIn: false,
                         guestLoggedIn: false,
                         errorMessage: null
                     }
                 })
                 history.push("/login");
-                console.log("NOW WE LOGIN");
-                auth.loginUser(email, password);
-                console.log("LOGGED IN");
             } else {
                 authReducer({
                     type: AuthActionType.REGISTER_USER,
