@@ -1,11 +1,5 @@
 :root {
-  /* 
-        FIRST WE'LL DEFINE OUR SWATCHES, i.e. THE COMPLEMENTARY
-        COLORS THAT WE'LL USE TOGETHER IN MULTIPLE PLACES THAT
-        TOGETHER WILL MAKE UP A GIVEN THEME
-    
-        @author McKilla Gorilla
-    */
+
   --swatch-foundation: #eeeedd;
   --swatch-primary: antiquewhite;
   --swatch-complement: #e1e4cb;
@@ -267,8 +261,6 @@ input {
   color: var(--swatch-neutral);
 }
 
-/* THIS STYLE SHEET MANAGES STYLE FOR OUR MODAL, i.e. DIALOG BOX */
-
 .modal {
   position: fixed;
   top: 0;
@@ -367,8 +359,6 @@ input {
   text-align: center;
 }
 
-/* ANIMATIONS
-–––––––––––––––––––––––––––––––––––––––––––––––––– */
 [data-animation] .modal-dialog {
   opacity: 0;
   transition: all 0.5s var(--bounceEasing);

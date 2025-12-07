@@ -83,7 +83,6 @@ loginUser = async (req, res) => {
                 })
         }
 
-        // LOGIN THE USER
         const token = auth.signToken(existingUser._id);
         console.log(token);
 
@@ -166,7 +165,6 @@ updateUser = async (req, res) => {
             return res.status(400).json({ success: false, errorMessage: "User not found." });
         }
 
-        // LOGIN THE USER
         const token = auth.signToken(updatedUser._id);
 
         await res.cookie("token", token, {

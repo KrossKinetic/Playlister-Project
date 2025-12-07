@@ -611,9 +611,6 @@ function GlobalStoreContextProvider(props) {
         store.updateCurrentList();
     }
 
-
-
-
     store.addNewSong = () => {
         let playlistSize = store.getPlaylistSize();
         store.addCreateSongTransaction(
@@ -622,14 +619,6 @@ function GlobalStoreContextProvider(props) {
 
     store.canClose = function () {
         return (store.currentList !== null);
-    }
-
-    // THIS FUNCTION ENABLES THE PROCESS OF EDITING A LIST NAME
-    store.setIsListNameEditActive = function () {
-        storeReducer({
-            type: GlobalStoreActionType.SET_LIST_NAME_EDIT_ACTIVE,
-            payload: null
-        });
     }
 
     store.getPlaylistSize = function () {

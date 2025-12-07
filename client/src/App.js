@@ -12,12 +12,7 @@ import {
     SongsCatalog,
     HomeWrapper
 } from './components'
-/*
-  This is the entry-point for our application. Notice that we
-  inject our store into all the components in our application.
-  
-  @author McKilla Gorilla
-*/
+
 const App = () => {
     return (
         <BrowserRouter>
