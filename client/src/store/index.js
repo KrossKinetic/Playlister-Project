@@ -458,7 +458,7 @@ function GlobalStoreContextProvider(props) {
         asyncDeleteSong(id);
     }
 
-    // THIS FUNCTION UPDATES THE TEXT IN THE ITEM AT index TO text
+
     store.updateSongDetails = async function (id, songData) {
         let response = await storeRequestSender.updateSong(id, songData);
         if (response.data.success) {
@@ -486,10 +486,7 @@ function GlobalStoreContextProvider(props) {
     }
 
 
-    // MARK: - Transaction System
-    // ===========================================
-    // TRANSACTION SYSTEM START
-    // ===========================================
+
     store.undo = function () {
         tps.undoTransaction();
     }
@@ -614,8 +611,7 @@ function GlobalStoreContextProvider(props) {
         store.updateCurrentList();
     }
 
-    // MARK: Below are the functions not being used yet
-    // ===========================================
+
 
 
     store.addNewSong = () => {

@@ -48,12 +48,12 @@ function PlaylistsScreen() {
     }, []);
 
     useEffect(() => {
-        console.log(store.playlists);
+
         if (store.playlists) {
             if (wasModalOpen) {
                 setWasModalOpen(false);
             }
-            console.log("PlaylistsScreen Effect: Source=", store.songCatalogSource, "CurrentList=", store.currentList);
+
             if (store.songCatalogSource === "Modal" && store.currentList) {
                 const freshPlaylist = store.playlists.find(p => p._id === store.currentList._id);
                 if (freshPlaylist) {
@@ -326,7 +326,7 @@ function PlaylistsScreen() {
                                             </Box>
                                         </Box>
 
-                                        {/* Action Buttons */}
+
                                         <Box sx={{ display: 'flex', gap: 1 }}>
                                             {
                                                 playlist.ownerEmail === auth.user.email && (

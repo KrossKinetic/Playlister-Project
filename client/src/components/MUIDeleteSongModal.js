@@ -20,7 +20,7 @@ const style = {
 };
 
 const headerStyle = {
-    bgcolor: '#6a5acd', // Darker green for header
+    bgcolor: '#6a5acd',
     color: 'white',
     p: 3,
     textAlign: 'center',

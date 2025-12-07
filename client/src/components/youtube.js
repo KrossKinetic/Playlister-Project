@@ -8,7 +8,7 @@ function YouTubePlayer({ playlist, currentSongIndex, setCurrentSongIndex, setPla
     const [song, setSong] = useState(playlist[currentSongIndex]);
     const [videoId, setVideoId] = useState(song ? song.youTubeId : "");
 
-    // Ensure state updates when props change
+
     React.useEffect(() => {
         const newSong = playlist[currentSongIndex];
         setSong(newSong);

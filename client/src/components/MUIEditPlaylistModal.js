@@ -80,9 +80,7 @@ export default function MUIEditPlaylistModal({ open, handleClose, playlist: prop
     const [text, setText] = useState("");
     const [isEditing, setIsEditing] = useState(false);
 
-    // Use store.currentList if available and IDs match (or just strictly store.currentList if we trust it's set)
-    // The previous implementation used the prop strictly. 
-    // Since we call setCurrentList when editing, store.currentList should be the authority.
+
     const playlist = store.currentList || propsPlaylist;
 
     if (!playlist) return null;
@@ -126,7 +124,7 @@ export default function MUIEditPlaylistModal({ open, handleClose, playlist: prop
         let targetIndex = index;
         let sourceIndex = Number(event.dataTransfer.getData("song"));
 
-        // UPDATE THE LIST
+
         store.addMoveSongTransaction(sourceIndex, targetIndex);
     }
 
