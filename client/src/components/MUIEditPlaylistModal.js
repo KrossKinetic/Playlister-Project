@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import TextField from '@mui/material/TextField';
+import ErrorToast from './ErrorToast';
 
 
 const style = {
@@ -79,6 +80,8 @@ export default function MUIEditPlaylistModal({ open, handleClose, playlist: prop
     const history = useHistory();
     const [text, setText] = useState("");
     const [isEditing, setIsEditing] = useState(false);
+    const [errorToast, setErrorToast] = useState(false);
+    const [errorToastMessage, setErrorToastMessage] = useState("");
 
 
     const playlist = store.currentList || propsPlaylist;
@@ -98,9 +101,27 @@ export default function MUIEditPlaylistModal({ open, handleClose, playlist: prop
 
     function handleBlur() {
         setIsEditing(false);
-        if (text !== playlist.name && text !== "") {
-            store.addRenamePlaylistTransaction(playlist.name, text);
+
+        // If name is unchanged or empty, revert and do nothing
+        if (text === playlist.name || text === "") {
+            setText(playlist.name);
+            return;
         }
+
+        // Check for duplicate name among THIS user's playlists
+        const isDuplicate = store.playlists.some(p =>
+            p.name === text &&
+            p.ownerEmail === playlist.ownerEmail
+        );
+
+        if (isDuplicate) {
+            setErrorToast(true);
+            setErrorToastMessage("Playlist name already exists");
+            setText(playlist.name); // Revert
+            return;
+        }
+
+        store.addRenamePlaylistTransaction(playlist.name, text);
     }
 
     function handleDragStart(event, index) {
@@ -288,6 +309,7 @@ export default function MUIEditPlaylistModal({ open, handleClose, playlist: prop
                         </Box>
                     </Box>
                 </Box>
+                <ErrorToast open={errorToast} onClose={() => setErrorToast(false)} message={errorToastMessage} />
             </Box>
         </Modal>
     );
