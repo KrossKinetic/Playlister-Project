@@ -241,31 +241,53 @@ export default function MUIPlayPlaylistModal({ open, handleClose, playlist }) {
                                 {playlist.songs[currentSongIndex]?.artist || "Unknown Artist"} ({playlist.songs[currentSongIndex]?.year})
                             </Typography>
 
-                            <Box sx={controlsStyle}>
-                                <IconButton onClick={() => setIsRepeat(!isRepeat)} sx={{ color: isRepeat ? '#6a5acd' : '#555', bgcolor: isRepeat ? '#e8f5e9' : 'transparent', '&:hover': { color: '#6a5acd', bgcolor: '#e8f5e9' } }}>
-                                    <RepeatIcon sx={{ fontSize: 28 }} />
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                                <IconButton onClick={() => setIsRepeat(!isRepeat)} sx={{ color: isRepeat ? '#6a5acd' : '#555' }}>
+                                    <RepeatIcon />
                                 </IconButton>
-                                <IconButton onClick={handleSkipPrevious} sx={{ color: '#555', '&:hover': { color: '#6a5acd', bgcolor: '#e8f5e9' } }}>
-                                    <SkipPreviousIcon sx={{ fontSize: 32 }} />
-                                </IconButton>
-                                <IconButton
-                                    onClick={handlePlayPause}
+                                <Button
+                                    variant="contained"
+                                    onClick={handleSkipPrevious}
                                     sx={{
-                                        color: 'white',
+                                        minWidth: 'auto',
                                         bgcolor: '#6a5acd',
-                                        p: 1.5,
-                                        '&:hover': { bgcolor: '#483d8b' },
-                                        boxShadow: '0 2px 8px rgba(46, 125, 50, 0.4)'
+                                        color: 'white',
+                                        borderRadius: '8px',
+                                        p: 1,
+                                        '&:hover': { bgcolor: '#483d8b' }
                                     }}
                                 >
-                                    {isPlaying ?
-                                        <PauseIcon sx={{ fontSize: 36 }} /> :
-                                        <PlayArrowIcon sx={{ fontSize: 36 }} />
-                                    }
-                                </IconButton>
-                                <IconButton onClick={handleSkipNext} sx={{ color: '#555', '&:hover': { color: '#6a5acd', bgcolor: '#e8f5e9' } }}>
-                                    <SkipNextIcon sx={{ fontSize: 32 }} />
-                                </IconButton>
+                                    <SkipPreviousIcon />
+                                </Button>
+                                <Button
+                                    variant="contained"
+                                    onClick={handlePlayPause}
+                                    sx={{
+                                        minWidth: 'auto',
+                                        bgcolor: '#6a5acd',
+                                        color: 'white',
+                                        borderRadius: '8px',
+                                        p: 1,
+                                        mx: 1,
+                                        '&:hover': { bgcolor: '#483d8b' }
+                                    }}
+                                >
+                                    {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
+                                </Button>
+                                <Button
+                                    variant="contained"
+                                    onClick={handleSkipNext}
+                                    sx={{
+                                        minWidth: 'auto',
+                                        bgcolor: '#6a5acd',
+                                        color: 'white',
+                                        borderRadius: '8px',
+                                        p: 1,
+                                        '&:hover': { bgcolor: '#483d8b' }
+                                    }}
+                                >
+                                    <SkipNextIcon />
+                                </Button>
                             </Box>
                         </Box>
                         <Button

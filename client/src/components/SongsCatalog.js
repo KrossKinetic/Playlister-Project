@@ -185,10 +185,20 @@ function SongsCatalog() {
         setSearchYear("");
         setSortType("listens-hi-lo");
         if (auth.loggedIn && auth.guestLoggedIn === false) {
-            setFilteredSongs(store.songCatalog.filter(s => (s.created_by === auth.user.email)));
+            let list = store.songCatalog.filter(s => (s.created_by === auth.user.email));
+
+            const comparator = getComparator("listens-hi-lo");
+            const sorted = [...list].sort(comparator);
+            setFilteredSongs(sorted);
+
             setIsUserFilterActive(true);
         } else {
-            setFilteredSongs(store.songCatalog);
+            let list = store.songCatalog;
+
+            const comparator = getComparator("listens-hi-lo");
+            const sorted = [...list].sort(comparator);
+            setFilteredSongs(sorted);
+
             setIsUserFilterActive(false);
         }
     };
