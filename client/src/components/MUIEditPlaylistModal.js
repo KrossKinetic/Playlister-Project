@@ -256,6 +256,7 @@ export default function MUIEditPlaylistModal({ open, handleClose, playlist }) {
                                                     '&:hover': { bgcolor: '#483d8b' },
                                                     mr: 1
                                                 }}
+                                                onClick={() => store.addCreateSongTransaction(index, song.title, song.artist, song.year, song.youTubeId)}
                                             >
                                                 Duplicate
                                             </Button>

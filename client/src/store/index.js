@@ -312,12 +312,13 @@ function GlobalStoreContextProvider(props) {
 
     store.createNewSong = async function (title, artist, year, youTubeId) {
         const response = await storeRequestSender.createSong(title, artist, year, youTubeId);
-        console.log("createNewSong response: " + response);
         if (response.data.success) {
+            const song = response.data.song;
             store.loadSongCatalog();
-            return "success";
+            return { success: true, song: song };
         } else {
-            return response.data.errorMessage;
+            console.log("createNewSong failed: " + response.data.errorMessage);
+            return { success: false, song: null, errorMessage: response.data.errorMessage };
         }
     }
 
@@ -444,8 +445,6 @@ function GlobalStoreContextProvider(props) {
         }
     }
 
-
-
     store.deleteSong = function (id) {
         async function asyncDeleteSong(id) {
             let response = await storeRequestSender.deleteSong(id);
@@ -522,6 +521,7 @@ function GlobalStoreContextProvider(props) {
 
     store.removeSong = function (index) {
         let list = store.currentList;
+        storeRequestSender.deleteSong(list.songs[index]._id);
         list.songs.splice(index, 1);
         store.updateCurrentList();
     }
@@ -539,6 +539,33 @@ function GlobalStoreContextProvider(props) {
         let list = store.currentList;
         list.name = name;
         store.updateCurrentList();
+    }
+
+    store.addCreateSongTransaction = (index, title, artist, year, youTubeId) => {
+        let song = {
+            title: title,
+            artist: artist,
+            year: year,
+            youTubeId: youTubeId,
+        };
+
+        let transaction = new CreateSong_Transaction(store, index, song);
+        tps.processTransaction(transaction);
+    }
+    store.createSong = async function (index, song) {
+        let songCopy = { ...song };
+        let list = store.currentList;
+        let newSong = null;
+
+        while (newSong === null) {
+            songCopy.title = songCopy.title + " (COPY)";
+            newSong = (await store.createNewSong(songCopy.title, songCopy.artist, songCopy.year, songCopy.youTubeId)).song;
+        }
+
+        if (newSong) {
+            list.songs.splice(index, 0, newSong);
+            store.updateCurrentList();
+        }
     }
 
     // MARK: Below are the functions not being used yet
@@ -571,26 +598,6 @@ function GlobalStoreContextProvider(props) {
         let playlistSize = store.getPlaylistSize();
         store.addCreateSongTransaction(
             playlistSize, "Untitled", "?", new Date().getFullYear(), "dQw4w9WgXcQ");
-    }
-
-    // THIS FUNCTION CREATES A NEW SONG IN THE CURRENT LIST
-    store.createSong = function (index, song) {
-        let list = store.currentList;
-        list.songs.splice(index, 0, song);
-        store.updateCurrentList();
-    }
-
-    // THIS FUNCDTION ADDS A CreateSong_Transaction TO THE TRANSACTION STACK
-    store.addCreateSongTransaction = (index, title, artist, year, youTubeId) => {
-        // ADD A SONG ITEM AND ITS NUMBER
-        let song = {
-            title: title,
-            artist: artist,
-            year: year,
-            youTubeId: youTubeId
-        };
-        let transaction = new CreateSong_Transaction(store, index, song);
-        tps.processTransaction(transaction);
     }
 
     store.canClose = function () {

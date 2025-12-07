@@ -289,10 +289,11 @@ function SongsCatalog() {
 
     const handleCreateNewSongSubmit = async (title, artist, year, youTubeId) => {
         const result = await store.createNewSong(title, artist, year, youTubeId);
-        if (result === "success") {
+        console.log(result);
+        if (result.success) {
             setIsCreateSongModalOpen(false);
         } else {
-            setCreateSongModalError(result);
+            setCreateSongModalError(result.errorMessage);
         }
         setMaintainFilterSort(true);
     };
