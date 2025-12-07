@@ -78,6 +78,10 @@ class DatabaseManager {
     static updatePlaylistListeners = async (req) => {
         return MongoDatabaseManagerStore.updatePlaylistListeners(req)
     }
+
+    static updatePlaylistLastAccessed = async (id) => {
+        return MongoDatabaseManagerStore.updatePlaylistLastAccessed(id)
+    }
 }
 
 module.exports = DatabaseManager

@@ -128,6 +128,7 @@ function PlaylistsScreen() {
 
     const handlePlayPlaylist = (playlist) => {
         store.updatePlaylistListeners(playlist._id);
+        store.updatePlaylistLastAccessed(playlist._id);
         setPlayingPlaylist(playlist);
     };
 
@@ -137,6 +138,7 @@ function PlaylistsScreen() {
 
     const handleEditPlaylist = (playlist) => {
         store.setCurrentList(playlist);
+        store.updatePlaylistLastAccessed(playlist._id);
         setEditingPlaylist(playlist);
     };
 

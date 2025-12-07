@@ -191,6 +191,21 @@ export async function updateSongListens(song_id) {
     return { data: data, status: res.status, statusText: res.statusText };
 }
 
+export async function updatePlaylistLastAccessed(id) {
+    const res = await api(`/playlistLastAccessed/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ id }),
+        headers: { 'Content-Type': 'application/json' }
+    });
+
+    let data = { success: false };
+    try {
+        data = await res.json();
+    } catch (err) { }
+
+    return { data: data, status: res.status, statusText: res.statusText };
+}
+
 const apis = {
     createPlaylist,
     deletePlaylistById,

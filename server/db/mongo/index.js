@@ -191,30 +191,16 @@ class MongoDatabaseManagerStore {
     }
 
     static updatePlaylistLastAccessed(playlistId) {
-        Playlist.findById(playlistId, (err, playlist) => {
-            if (err) {
-                console.error("Error finding playlist for updatePlaylistLastAccessed:", err);
-                return;
-            };
-            if (!playlist) return;
-
-            playlist.lastAccessed = Date.now();
-            Playlist.updateOne({ _id: playlistId }, playlist, (err, data) => {
-                if (err) {
-                    console.error("Error updating playlist lastAccessed:", err);
-                    throw err;
-                }
-            });
-        });
+        return Playlist.findByIdAndUpdate(playlistId, {
+            $set: { lastAccessed: Date.now() }
+        }).exec();
     }
 
 
-    // Get playlist
     static async getPlaylists() {
         try {
             const playlists = await Playlist.find({}).sort({ name: 1 }).populate('songs').lean();
 
-            // Populate user details manually (could also use populate if User ref existed in proper way, but assuming manual lookup is fine based on existing code)
             const populatedPlaylists = await Promise.all(playlists.map(async p => {
                 const user = await User.findOne({ email: p.ownerEmail });
                 p.avatarPng = user?.avatarPng ?? "";
@@ -231,23 +217,18 @@ class MongoDatabaseManagerStore {
         }
     }
 
-
-    // Get Playlist Pairs
     static async getPlaylistPairs(req) {
         try {
-            // Find the user by ID
             const user = await User.findOne({ _id: req.userId });
             if (!user) {
                 return { success: false, message: "User not found" };
             }
 
-            // Find all playlists owned by that user
             const playlists = await Playlist.find({ ownerEmail: user.email }).sort({ name: 1 });
             if (!playlists || playlists.length === 0) {
                 return { success: false, message: "Playlists not found" };
             }
 
-            // Build id-name pairs
             const pairs = playlists.map(list => ({
                 _id: list._id,
                 name: list.name
@@ -264,7 +245,6 @@ class MongoDatabaseManagerStore {
 
     static async getPlaylistById(req) {
         try {
-            // Find the playlist by ID and populate songs
             const list = await Playlist.findById(req.params.id).populate('songs');
             if (!list) {
                 return { success: false, message: "Playlist not found" };
@@ -272,7 +252,6 @@ class MongoDatabaseManagerStore {
 
             console.log("Found list:", JSON.stringify(list));
 
-            // Find the user who owns it
             const user = await User.findOne({ email: list.ownerEmail });
             if (!user) {
                 return { success: false, message: "User not found" };
@@ -301,7 +280,6 @@ class MongoDatabaseManagerStore {
             const songs = await Song.find({}).sort({ title: 1 });
             console.log("getSongPairs songs found:", songs.length);
 
-            // Not sure if the playlist count is supposed to be unique, but if not, we can just remove duplicates from the list
             const playlists = (await Playlist.find({}, 'songs')).map(p => {
                 p.songs = [...new Set(p.songs.map(id => id.toString()))];
                 return p;
@@ -434,13 +412,6 @@ class MongoDatabaseManagerStore {
 
     static async updateSong(req, body) {
         try {
-            // Check for potential duplicate if changing identifying fields
-            if (body.title || body.artist || body.year) {
-                // Optimization: only check if these fields are actually present
-                // logic omitted for brevity as it might be complex to check against *other* songs vs *current* song correctly
-                // The original code check was slightly loose.
-            }
-
             const song = await Song.findById(req.params.id);
             if (!song) {
                 return { success: false, message: "Song not found" };
@@ -452,8 +423,6 @@ class MongoDatabaseManagerStore {
             }
 
             if (song.created_by !== user.email) {
-                // removed strict checks against playlist/listens since body might not have them
-                // and ownership check is mainly about creator for edits
                 return { success: false, message: "Authentication error" };
             }
 
@@ -473,8 +442,6 @@ class MongoDatabaseManagerStore {
             if (body.listens !== undefined) {
                 song.listens = body.listens;
             }
-
-            // playlists is no longer on song
 
             console.log("Updated song:", song);
 

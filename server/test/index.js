@@ -186,9 +186,11 @@ const songs = [
 ];
 
 const Playlist = require('../db/mongo/playlist-model');
+const User = require('../db/mongo/user-model');
+const bcrypt = require('bcryptjs');
 
 async function getYouTubeDuration(videoId) {
-
+    // ... (existing getYouTubeDuration code) ...
     const API_KEY = process.env.YOUTUBE_API_KEY;
     const url = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=contentDetails&key=${API_KEY}`;
 
@@ -226,18 +228,32 @@ async function getYouTubeDuration(videoId) {
 async function populateSongs() {
     try {
         await mongoose.connect(process.env.DB_CONNECT, { useNewUrlParser: true });
-        console.log('Connected to Mongo, populating Song and Playlist collections...');
+        console.log('Connected to Mongo, populating Song, Playlist and User collections...');
 
         await Song.deleteMany({});
         console.log('Song collection cleared');
         await Playlist.deleteMany({});
         console.log('Playlist collection cleared');
+        await User.deleteMany({});
+        console.log('User collection cleared');
+
+        const saltRounds = 10;
+        const salt = await bcrypt.genSalt(saltRounds);
+        const passwordHash = await bcrypt.hash("123456789", salt);
+
+        const usersData = [
+            { username: "Kross", email: "kross@gmail.com", passwordHash: passwordHash, avatarPng: 2 },
+            { username: "Kross Other", email: "kross_other@gmail.com", passwordHash: passwordHash, avatarPng: 1 }
+        ];
+
+        const createdUsers = await User.insertMany(usersData);
+        console.log(`Inserted ${createdUsers.length} users`);
 
         const playlistsData = [
-            { name: "Rock Classics", ownerEmail: "kross@gmail.com", listeners_user: [], songs: [] },
-            { name: "My Pop Hits", ownerEmail: "kross@gmail.com", listeners_user: [], songs: [] },
-            { name: "Chill Vibes", ownerEmail: "kross_other@gmail.com", listeners_user: [], songs: [] },
-            { name: "Workout Mix", ownerEmail: "kross@gmail.com", listeners_user: [], songs: [] }
+            { name: "Rock Classics", ownerEmail: "kross@gmail.com", listeners_user: [], songs: [], lastAccessed: Date.now() },
+            { name: "My Pop Hits", ownerEmail: "kross@gmail.com", listeners_user: [], songs: [], lastAccessed: Date.now() },
+            { name: "Chill Vibes", ownerEmail: "kross_other@gmail.com", listeners_user: [], songs: [], lastAccessed: Date.now() },
+            { name: "Workout Mix", ownerEmail: "kross@gmail.com", listeners_user: [], songs: [], lastAccessed: Date.now() }
         ];
 
         const createdPlaylists = await Playlist.insertMany(playlistsData);

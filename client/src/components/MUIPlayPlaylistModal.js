@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
 import Typography from '@mui/material/Typography';
@@ -12,6 +12,8 @@ import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
 import RepeatIcon from '@mui/icons-material/Repeat';
 import YouTubePlayer from './youtube';
+import { GlobalStoreContext } from '../store';
+
 
 const style = {
     position: 'absolute',
@@ -113,6 +115,7 @@ const controlsStyle = {
 };
 
 export default function MUIPlayPlaylistModal({ open, handleClose, playlist }) {
+    const { store } = useContext(GlobalStoreContext);
     const [currentSongIndex, setCurrentSongIndex] = useState(0);
     const [videoId, setVideoId] = useState(null);
     const [player, setPlayer] = useState(null);

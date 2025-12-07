@@ -645,6 +645,10 @@ function GlobalStoreContextProvider(props) {
         });
     }
 
+    store.updatePlaylistLastAccessed = async function (id) {
+        await storeRequestSender.updatePlaylistLastAccessed(id);
+    }
+
     return (
         <GlobalStoreContext.Provider value={{
             store

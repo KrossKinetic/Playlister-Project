@@ -237,6 +237,9 @@ function SongsCatalog() {
                 listens: playlist.listens,
                 songs: [...playlist.songs, song]
             });
+            if (response.status === 200) {
+                store.updatePlaylistLastAccessed(playlist._id);
+            }
         } else {
             store.addSongToPlaylistTransaction(playlist._id, {
                 ...playlist,
@@ -245,6 +248,8 @@ function SongsCatalog() {
                 {
                     ...playlist,
                     songs: [...playlist.songs, song]
+                }).then(() => {
+                    store.updatePlaylistLastAccessed(playlist._id);
                 });
             response = "success";
             store.loadSongCatalog();
@@ -324,6 +329,11 @@ function SongsCatalog() {
     let menu_list = [];
     if (store.playlists && auth.user) {
         menu_list = store.playlists.filter(p => p.ownerEmail === auth.user.email);
+        menu_list.sort((a, b) => {
+            const dateA = new Date(a.lastAccessed || 0);
+            const dateB = new Date(b.lastAccessed || 0);
+            return dateB - dateA;
+        });
     }
 
     return (

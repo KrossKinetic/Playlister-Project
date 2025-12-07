@@ -300,50 +300,39 @@ updateSongListens = async (req, res) => {
         success: true,
         song: response.song
     });
+}
 
-
-    updatePlaylistLastAccessed = async (req, res) => {
-        try {
-            const body = req.body;
-            console.log("updatePlaylistLastAccessed: " + JSON.stringify(body));
-            if (!body) {
-                return res.status(400).json({
-                    success: false,
-                    error: 'You must provide a body to update',
-                })
-            }
-
-            // Check if user is logged in
-            auth.verifyUser(req);
-
-            // Assuming body contains { id: playlistId }
-            // For simplicity and matching other patterns, we can trigger the DB update directly
-            // However, usually we update a specific playlist by ID. 
-            // Let's assume the ID is passed in params or body.
-
-            // Actually, looking at the pattern, let's use the DB manager directly
-            // The DB manager method expects playlistId
-            await DatabaseManager.updatePlaylistLastAccessed(req.params.id);
-
-            return res.status(200).json({
-                success: true,
-                id: req.params.id,
-                message: 'Playlist last accessed updated!',
-            })
-        } catch (err) {
-            console.error(err);
+updatePlaylistLastAccessed = async (req, res) => {
+    try {
+        if (auth.verifyUser(req) === null) {
             return res.status(400).json({
-                success: false,
-                error: err.toString(),
+                errorMessage: 'UNAUTHORIZED'
             })
         }
-    }
 
+        await DatabaseManager.updatePlaylistLastAccessed(req.params.id);
+
+        return res.status(200).json({
+            success: true,
+            id: req.params.id,
+            message: 'Playlist last accessed updated!',
+        })
+    } catch (err) {
+        console.error(err);
+        return res.status(400).json({
+            success: false,
+            error: err.toString(),
+        })
+    }
 }
 
 module.exports = {
     createPlaylist,
     deletePlaylist,
+    getPlaylistById,
+    getPlaylistPairs,
+    getSongPairs,
+    getPlaylists,
     updatePlaylist,
     getPlaylists,
     createSong,
@@ -351,5 +340,5 @@ module.exports = {
     updateSong,
     updatePlaylistListeners,
     updateSongListens,
-    updatePlaylistLastAccessed // Export the new function
+    updatePlaylistLastAccessed
 }
