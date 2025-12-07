@@ -381,9 +381,11 @@ function GlobalStoreContextProvider(props) {
                 type: GlobalStoreActionType.CREATE_NEW_LIST,
                 payload: newList
             });
+            return newList;
         }
         else {
             console.log("FAILED TO CREATE A NEW LIST");
+            return null;
         }
     }
 

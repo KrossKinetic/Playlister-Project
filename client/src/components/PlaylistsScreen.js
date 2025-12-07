@@ -106,8 +106,13 @@ function PlaylistsScreen() {
         }));
     };
 
-    const handleCreateNewPlaylist = () => {
-        store.createNewList();
+    const handleCreateNewPlaylist = async () => {
+        const newPlaylist = await store.createNewList();
+        if (newPlaylist) {
+            store.setCurrentList(newPlaylist);
+            store.updatePlaylistLastAccessed(newPlaylist._id);
+            setEditingPlaylist(newPlaylist);
+        }
         setWasModalOpen(true);
     };
 
