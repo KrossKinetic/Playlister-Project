@@ -248,9 +248,8 @@ function SongsCatalog() {
                 {
                     ...playlist,
                     songs: [...playlist.songs, song]
-                }).then(() => {
-                    store.updatePlaylistLastAccessed(playlist._id);
                 });
+            store.updatePlaylistLastAccessed(playlist._id);
             response = "success";
             store.loadSongCatalog();
         }
