@@ -13,6 +13,6 @@ export default class RemoveSong_Transaction extends jsTPS_Transaction {
     }
 
     executeUndo() {
-        this.store.createSong(this.index, this.song);
+        this.store.createSongForRemove(this.index, this.song);
     }
 }

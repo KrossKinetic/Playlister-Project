@@ -8,15 +8,11 @@ function YouTubePlayer({ playlist, currentSongIndex, setCurrentSongIndex, setPla
     const [song, setSong] = useState(playlist[currentSongIndex]);
     const [videoId, setVideoId] = useState(song ? song.youTubeId : "");
 
-    // State to track if the video is ready to be played (validated)
-    const [isVideoValid, setIsVideoValid] = useState(false);
-
     // Ensure state updates when props change
     React.useEffect(() => {
         const newSong = playlist[currentSongIndex];
         setSong(newSong);
         setVideoId(newSong ? newSong.youTubeId : "");
-        setIsVideoValid(false);
         store.updateSongListens(newSong._id);
     }, [playlist, currentSongIndex]);
 
@@ -28,7 +24,6 @@ function YouTubePlayer({ playlist, currentSongIndex, setCurrentSongIndex, setPla
         },
     };
 
-    // Validate Video ID using noembed (public oEmbed proxy)
     React.useEffect(() => {
         let isMounted = true;
 
@@ -36,7 +31,6 @@ function YouTubePlayer({ playlist, currentSongIndex, setCurrentSongIndex, setPla
             if (!videoId) return;
 
             try {
-                // Fetch oEmbed data
                 const response = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`);
                 const data = await response.json();
 
@@ -45,11 +39,9 @@ function YouTubePlayer({ playlist, currentSongIndex, setCurrentSongIndex, setPla
                     if (isMounted) handleInternalSongEnd();
                 } else {
                     console.log(`[YouTubePlayer] Video ${videoId} valid: ${data.title}`);
-                    // Only start playing (render player) if valid
-                    if (isMounted) setIsVideoValid(true);
                 }
             } catch (error) {
-                if (isMounted) setIsVideoValid(true);
+                console.error("Validation error", error);
             }
         };
 
@@ -57,7 +49,6 @@ function YouTubePlayer({ playlist, currentSongIndex, setCurrentSongIndex, setPla
 
         return () => { isMounted = false; };
     }, [videoId]);
-
 
     function onPlayerReady(event) {
         event.target.playVideo();
@@ -83,20 +74,21 @@ function YouTubePlayer({ playlist, currentSongIndex, setCurrentSongIndex, setPla
             width: '100%',
             aspectRatio: '640 / 330'
         }}>
-            {isVideoValid ?
+            {videoId ? (
                 <YouTube
-                    key={videoId}
+                    key={song ? `${song.title}-${song.artist}-${song.year}-${videoId}-${currentSongIndex}` : currentSongIndex}
                     videoId={videoId}
                     opts={playerOptions}
                     onReady={onPlayerReady}
                     onEnd={handleInternalSongEnd}
+                    onError={handleInternalSongEnd}
                     style={{ height: '100%', width: '100%' }}
                 />
-                :
+            ) : (
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', backgroundColor: 'black', color: 'gray' }}>
-                    {videoId ? "Loading..." : "No Song"}
+                    No Song
                 </Box>
-            }
+            )}
         </Box>
     );
 }

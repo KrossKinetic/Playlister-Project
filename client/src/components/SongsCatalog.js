@@ -141,11 +141,16 @@ function SongsCatalog() {
     };
 
     const handleSongClick = (song) => {
-        setIsSongPlaying(true);
-        if (currentSongForPlaying !== song.youTubeId) {
+        if (currentSongForPlaying !== song._id) {
+            setIsSongPlaying(false);
             setMaintainFilterSort(true);
             store.updateSongListens(song._id);
-            setCurrentSongForPlaying(song.youTubeId);
+            setCurrentSongForPlaying(song._id);
+            setTimeout(() => {
+                setIsSongPlaying(true);
+            }, 50);
+        } else {
+            setIsSongPlaying(true);
         }
     };
 
@@ -224,12 +229,26 @@ function SongsCatalog() {
         }
         */
 
-        const response = await store.updatePlaylist(playlist._id, {
-            name: playlist.name,
-            ownerEmail: playlist.ownerEmail,
-            listens: playlist.listens,
-            songs: [...playlist.songs, song]
-        });
+        let response;
+        if (store.songCatalogSource !== "Modal") {
+            response = await store.updatePlaylist(playlist._id, {
+                name: playlist.name,
+                ownerEmail: playlist.ownerEmail,
+                listens: playlist.listens,
+                songs: [...playlist.songs, song]
+            });
+        } else {
+            store.addSongToPlaylistTransaction(playlist._id, {
+                ...playlist,
+                songs: [...playlist.songs],
+            },
+                {
+                    ...playlist,
+                    songs: [...playlist.songs, song]
+                });
+            response = "success";
+            store.loadSongCatalog();
+        }
 
         console.log("playlist after", playlist.songs);
 
@@ -415,7 +434,18 @@ function SongsCatalog() {
                         </Button>
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-                        {isSongPlaying && <YouTubePlayer videoId={currentSongForPlaying} />}
+                        {isSongPlaying && (() => {
+                            const playingSong = store.songCatalog.find(s => s._id === currentSongForPlaying);
+                            return (
+                                <YouTubePlayer
+                                    videoId={playingSong?.youTubeId || ""}
+                                    title={playingSong?.title || ""}
+                                    artist={playingSong?.artist || ""}
+                                    year={playingSong?.year || ""}
+                                    id={playingSong?._id || ""}
+                                />
+                            );
+                        })()}
                     </Box>
                 </Box>
             </Box>

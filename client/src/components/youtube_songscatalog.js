@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import YouTube from 'react-youtube';
 import { Box } from '@mui/material';
 
-function YouTubePlayer({ videoId }) {
+function YouTubePlayer({ videoId, title, artist, year, id }) {
     const [isVideoValid, setIsVideoValid] = useState(false);
     const [isValidating, setIsValidating] = useState(false);
 
@@ -24,10 +24,9 @@ function YouTubePlayer({ videoId }) {
             };
 
             setIsValidating(true);
-            setIsVideoValid(false); // Reset while validating
+            setIsVideoValid(false);
 
             try {
-                // Fetch oEmbed data
                 const response = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`);
                 const data = await response.json();
 
@@ -42,7 +41,6 @@ function YouTubePlayer({ videoId }) {
                 }
             } catch (error) {
                 console.error("Validation error", error);
-                // On network error, default to valid so we at least try
                 if (isMounted) setIsVideoValid(true);
             } finally {
                 if (isMounted) setIsValidating(false);
@@ -61,7 +59,7 @@ function YouTubePlayer({ videoId }) {
         }}>
             {isVideoValid ?
                 <YouTube
-                    key={videoId}
+                    key={`${title}-${artist}-${year}-${videoId}-${id}`}
                     videoId={videoId}
                     opts={playerOptions}
                     onReady={(event) => event.target.playVideo()}

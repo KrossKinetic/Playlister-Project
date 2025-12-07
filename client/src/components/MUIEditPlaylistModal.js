@@ -1,4 +1,5 @@
 import { useContext, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import GlobalStoreContext from '../store';
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
@@ -73,10 +74,16 @@ const songItemStyle = {
     }
 };
 
-export default function MUIEditPlaylistModal({ open, handleClose, playlist }) {
+export default function MUIEditPlaylistModal({ open, handleClose, playlist: propsPlaylist }) {
     const { store } = useContext(GlobalStoreContext);
+    const history = useHistory();
     const [text, setText] = useState("");
     const [isEditing, setIsEditing] = useState(false);
+
+    // Use store.currentList if available and IDs match (or just strictly store.currentList if we trust it's set)
+    // The previous implementation used the prop strictly. 
+    // Since we call setCurrentList when editing, store.currentList should be the authority.
+    const playlist = store.currentList || propsPlaylist;
 
     if (!playlist) return null;
 
@@ -179,7 +186,10 @@ export default function MUIEditPlaylistModal({ open, handleClose, playlist }) {
                             <Box sx={{ display: 'flex', gap: 1 }}>
                                 <Button
                                     disabled={!store.canAddNewSong()}
-                                    onClick={store.addNewSong}
+                                    onClick={() => {
+                                        store.setSongCatalogSource("Modal");
+                                        history.push("/songs");
+                                    }}
                                     variant="contained"
                                     sx={{
                                         bgcolor: '#6a5acd',

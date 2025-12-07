@@ -6,21 +6,12 @@ import CreateSong_Transaction from '../transactions/CreateSong_Transaction'
 import MoveSong_Transaction from '../transactions/MoveSong_Transaction'
 import RemoveSong_Transaction from '../transactions/RemoveSong_Transaction'
 import RenamePlaylist_Transaction from '../transactions/RenamePlaylist_Transaction'
+import AddSong_Transaction from '../transactions/AddSong_Transaction'
 import AuthContext from '../auth'
 
-/*
-    This is our global data store. Note that it uses the Flux design pattern,
-    which makes use of things like actions and reducers. 
-    
-    @author McKilla Gorilla
-*/
-
-// THIS IS THE CONTEXT WE'LL USE TO SHARE OUR STORE
 export const GlobalStoreContext = createContext({});
 console.log("create GlobalStoreContext");
 
-// THESE ARE ALL THE TYPES OF UPDATES TO OUR GLOBAL
-// DATA STORE STATE THAT CAN BE PROCESSED
 export const GlobalStoreActionType = {
     CHANGE_LIST_NAME: "CHANGE_LIST_NAME",
     CLOSE_CURRENT_LIST: "CLOSE_CURRENT_LIST",
@@ -37,7 +28,6 @@ export const GlobalStoreActionType = {
     SONGS_CATALOG_SOURCE: "SONGS_CATALOG_SOURCE"
 }
 
-// WE'LL NEED THIS TO PROCESS TRANSACTIONS
 const tps = new jsTPS();
 
 const CurrentModal = {
@@ -47,16 +37,15 @@ const CurrentModal = {
     ERROR: "ERROR"
 }
 
-// WITH THIS WE'RE MAKING OUR GLOBAL DATA STORE
-// AVAILABLE TO THE REST OF THE APPLICATION
 function GlobalStoreContextProvider(props) {
-    // THESE ARE ALL THE THINGS OUR DATA STORE WILL MANAGE
     const [store, setStore] = useState({
         currentModal: CurrentModal.NONE,
         idNamePairs: [],
         currentList: null,
         currentSongIndex: -1,
         currentSong: null,
+        currentSong: null,
+        songCatalogSource: null,
         newListCounter: 0,
         listNameActive: false,
         listIdMarkedForDeletion: null,
@@ -69,7 +58,6 @@ function GlobalStoreContextProvider(props) {
 
     console.log("inside useGlobalStore");
 
-    // SINCE WE'VE WRAPPED THE STORE IN THE AUTH CONTEXT WE CAN ACCESS THE USER HERE
     const { auth } = useContext(AuthContext);
     console.log("auth: " + auth);
 
@@ -97,7 +85,7 @@ function GlobalStoreContextProvider(props) {
                     return {
                         currentModal: CurrentModal.NONE,
                         idNamePairs: prevStore.idNamePairs,
-                        currentList: null, // reset
+                        currentList: null,
                         currentSongIndex: -1,
                         currentSong: null,
                         newListCounter: prevStore.newListCounter,
@@ -113,10 +101,10 @@ function GlobalStoreContextProvider(props) {
                     return {
                         currentModal: CurrentModal.NONE,
                         idNamePairs: prevStore.idNamePairs,
-                        currentList: null, // Don't set as current list to avoid Statusbar display
+                        currentList: null,
                         currentSongIndex: -1,
                         currentSong: null,
-                        newListCounter: prevStore.newListCounter + 1, // updated
+                        newListCounter: prevStore.newListCounter + 1,
                         listNameActive: false,
                         listIdMarkedForDeletion: null,
                         listMarkedForDeletion: null,
@@ -128,7 +116,7 @@ function GlobalStoreContextProvider(props) {
                 case GlobalStoreActionType.LOAD_ID_NAME_PAIRS: {
                     return {
                         currentModal: CurrentModal.NONE,
-                        idNamePairs: payload, // updated
+                        idNamePairs: payload,
                         currentList: null,
                         currentSongIndex: -1,
                         currentSong: null,
@@ -143,15 +131,15 @@ function GlobalStoreContextProvider(props) {
                 }
                 case GlobalStoreActionType.MARK_LIST_FOR_DELETION: {
                     return {
-                        currentModal: CurrentModal.DELETE_LIST, // set
+                        currentModal: CurrentModal.DELETE_LIST,
                         idNamePairs: prevStore.idNamePairs,
                         currentList: null,
                         currentSongIndex: -1,
                         currentSong: null,
                         newListCounter: prevStore.newListCounter,
                         listNameActive: false,
-                        listIdMarkedForDeletion: payload.id, // set
-                        listMarkedForDeletion: payload.playlist, // set
+                        listIdMarkedForDeletion: payload.id,
+                        listMarkedForDeletion: payload.playlist,
                         songCatalog: prevStore.songCatalog,
                         playlists: prevStore.playlists,
                         songCatalogSource: prevStore.songCatalogSource
@@ -161,7 +149,7 @@ function GlobalStoreContextProvider(props) {
                     return {
                         currentModal: CurrentModal.NONE,
                         idNamePairs: prevStore.idNamePairs,
-                        currentList: payload, // updated
+                        currentList: payload,
                         currentSongIndex: -1,
                         currentSong: null,
                         newListCounter: prevStore.newListCounter,
@@ -181,7 +169,7 @@ function GlobalStoreContextProvider(props) {
                         currentSongIndex: -1,
                         currentSong: null,
                         newListCounter: prevStore.newListCounter,
-                        listNameActive: true, // set
+                        listNameActive: true,
                         listIdMarkedForDeletion: null,
                         listMarkedForDeletion: null,
                         songCatalog: prevStore.songCatalog,
@@ -200,7 +188,7 @@ function GlobalStoreContextProvider(props) {
                         listNameActive: false,
                         listIdMarkedForDeletion: null,
                         listMarkedForDeletion: null,
-                        songCatalog: payload, // updated
+                        songCatalog: payload,
                         playlists: prevStore.playlists,
                         songCatalogSource: prevStore.songCatalogSource
                     };
@@ -216,14 +204,14 @@ function GlobalStoreContextProvider(props) {
                         listNameActive: false,
                         listIdMarkedForDeletion: null,
                         listMarkedForDeletion: null,
-                        songCatalog: payload, // updated
+                        songCatalog: payload,
                         playlists: prevStore.playlists,
                         songCatalogSource: prevStore.songCatalogSource
                     };
                 }
                 case GlobalStoreActionType.HIDE_MODALS: {
                     return {
-                        currentModal: CurrentModal.NONE, // reset
+                        currentModal: CurrentModal.NONE,
                         idNamePairs: prevStore.idNamePairs,
                         currentList: prevStore.currentList,
                         currentSongIndex: -1,
@@ -248,7 +236,7 @@ function GlobalStoreContextProvider(props) {
                         listNameActive: false,
                         listIdMarkedForDeletion: null,
                         listMarkedForDeletion: null,
-                        songCatalog: payload, // updated
+                        songCatalog: payload,
                         playlists: prevStore.playlists,
                         songCatalogSource: prevStore.songCatalogSource
                     };
@@ -264,7 +252,7 @@ function GlobalStoreContextProvider(props) {
                         listNameActive: false,
                         listIdMarkedForDeletion: null,
                         listMarkedForDeletion: null,
-                        songCatalog: prevStore.songCatalog, // Being Used
+                        songCatalog: prevStore.songCatalog,
                         playlists: payload,
                         songCatalogSource: prevStore.songCatalogSource
                     };
@@ -286,6 +274,22 @@ function GlobalStoreContextProvider(props) {
                     };
                 }
 
+                case GlobalStoreActionType.SONGS_CATALOG_SOURCE: {
+                    return {
+                        currentModal: CurrentModal.NONE,
+                        idNamePairs: prevStore.idNamePairs,
+                        currentList: prevStore.currentList,
+                        currentSongIndex: -1,
+                        currentSong: null,
+                        newListCounter: prevStore.newListCounter,
+                        listNameActive: false,
+                        listIdMarkedForDeletion: null,
+                        listMarkedForDeletion: null,
+                        songCatalog: prevStore.songCatalog,
+                        playlists: prevStore.playlists,
+                        songCatalogSource: payload
+                    };
+                }
                 default:
                     return prevStore;
             }
@@ -342,7 +346,6 @@ function GlobalStoreContextProvider(props) {
         }
     }
 
-    // THIS FUNCTION CREATES A NEW LIST
     store.createNewList = async function () {
         let newListName = "Untitled 0";
         if (store.playlists) {
@@ -467,13 +470,15 @@ function GlobalStoreContextProvider(props) {
     }
 
     store.updatePlaylist = async function (id, playlist) {
-        const response = await storeRequestSender.updatePlaylistById(id, playlist);
+        let response = await storeRequestSender.updatePlaylistById(id, playlist);
         if (response.data.success) {
-            const playlists = await store.loadPlaylists()
-            storeReducer({
-                type: GlobalStoreActionType.LOAD_PLAYLIST,
-                payload: playlists
-            });
+            await store.loadPlaylists();
+            store.loadSongCatalog();
+
+            if (store.currentList && store.currentList._id === id) {
+                store.setCurrentList(playlist);
+            }
+
             return "success";
         } else {
             return response.data.errorMessage;
@@ -520,6 +525,11 @@ function GlobalStoreContextProvider(props) {
     }
 
     store.removeSong = function (index) {
+        let list = store.currentList;
+        list.songs.splice(index, 1);
+        store.updateCurrentList();
+    }
+    store.removeSongForDuplication = function (index) {
         let list = store.currentList;
         storeRequestSender.deleteSong(list.songs[index]._id);
         list.songs.splice(index, 1);
@@ -568,8 +578,18 @@ function GlobalStoreContextProvider(props) {
         }
     }
 
-    // MARK: Below are the functions not being used yet
-    // ===========================================
+    store.createSongForRemove = function (index, song) {
+        let songCopy = { ...song };
+        let list = store.currentList;
+        list.songs.splice(index, 0, songCopy);
+        store.updateCurrentList();
+    }
+
+    store.addSongToPlaylistTransaction = (playlist_id, playlistOld, playlistNew) => {
+        let transaction = new AddSong_Transaction(store, playlist_id, playlistOld, playlistNew);
+        tps.processTransaction(transaction);
+    }
+
     store.addMoveSongTransaction = function (start, end) {
         let transaction = new MoveSong_Transaction(store, start, end);
         tps.processTransaction(transaction);
@@ -593,6 +613,10 @@ function GlobalStoreContextProvider(props) {
         }
         store.updateCurrentList();
     }
+
+    // MARK: Below are the functions not being used yet
+    // ===========================================
+
 
     store.addNewSong = () => {
         let playlistSize = store.getPlaylistSize();
@@ -628,6 +652,13 @@ function GlobalStoreContextProvider(props) {
     }
 
     document.onkeydown = (event) => KeyPress(event);
+
+    store.setSongCatalogSource = function (source) {
+        storeReducer({
+            type: GlobalStoreActionType.SONGS_CATALOG_SOURCE,
+            payload: source
+        });
+    }
 
     return (
         <GlobalStoreContext.Provider value={{

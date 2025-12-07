@@ -53,6 +53,15 @@ function PlaylistsScreen() {
             if (wasModalOpen) {
                 setWasModalOpen(false);
             }
+            console.log("PlaylistsScreen Effect: Source=", store.songCatalogSource, "CurrentList=", store.currentList);
+            if (store.songCatalogSource === "Modal" && store.currentList) {
+                const freshPlaylist = store.playlists.find(p => p._id === store.currentList._id);
+                if (freshPlaylist) {
+                    store.setCurrentList(freshPlaylist);
+                    setEditingPlaylist(freshPlaylist);
+                }
+                store.setSongCatalogSource(null);
+            }
 
             const hasSearch = searchPlaylistName || searchUserName || searchSongTitle || searchSongArtist || searchSongYear;
 
@@ -133,6 +142,7 @@ function PlaylistsScreen() {
 
     const handleCloseEditModal = () => {
         store.setCurrentList(null);
+        store.loadPlaylists();
         setEditingPlaylist(null);
     };
 
