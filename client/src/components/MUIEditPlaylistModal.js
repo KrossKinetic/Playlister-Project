@@ -98,6 +98,31 @@ export default function MUIEditPlaylistModal({ open, handleClose, playlist }) {
         }
     }
 
+    function handleDragStart(event, index) {
+        event.dataTransfer.setData("song", index);
+    }
+
+    function handleDragOver(event) {
+        event.preventDefault();
+    }
+
+    function handleDragEnter(event) {
+        event.preventDefault();
+    }
+
+    function handleDragLeave(event) {
+        event.preventDefault();
+    }
+
+    function handleDrop(event, index) {
+        event.preventDefault();
+        let targetIndex = index;
+        let sourceIndex = Number(event.dataTransfer.getData("song"));
+
+        // UPDATE THE LIST
+        store.addMoveSongTransaction(sourceIndex, targetIndex);
+    }
+
     return (
         <Modal
             open={open}
@@ -210,6 +235,12 @@ export default function MUIEditPlaylistModal({ open, handleClose, playlist }) {
                                 <Box
                                     key={index}
                                     sx={songItemStyle}
+                                    draggable
+                                    onDragStart={(event) => handleDragStart(event, index)}
+                                    onDragOver={(event) => handleDragOver(event)}
+                                    onDragEnter={(event) => handleDragEnter(event)}
+                                    onDragLeave={(event) => handleDragLeave(event)}
+                                    onDrop={(event) => handleDrop(event, index)}
                                 >
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <Typography variant="body2" sx={{ fontWeight: 'inherit' }}>

@@ -211,20 +211,27 @@ function SongsCatalog() {
     };
 
     const handleAddSongToPlaylist = async (playlist, song) => {
-        if (playlist.songs.includes(song._id)) {
+
+        console.log("playlist before", playlist.songs);
+
+        /* Remove this if duplicates are not allowed
+        if (playlist.songs.some(s => s._id === song._id)) {
             setErrorToastState({
                 open: true,
                 message: "This song already exists in this playlist, choose a different song or playlist."
             })
             return;
         }
+        */
 
         const response = await store.updatePlaylist(playlist._id, {
             name: playlist.name,
             ownerEmail: playlist.ownerEmail,
             listens: playlist.listens,
-            songs: [...playlist.songs, song._id]
+            songs: [...playlist.songs, song]
         });
+
+        console.log("playlist after", playlist.songs);
 
         if (response === "success") {
             store.loadSongCatalog();

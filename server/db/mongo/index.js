@@ -268,16 +268,17 @@ class MongoDatabaseManagerStore {
         }
     }
 
-    // Newly added endpoints
-    // Get Song Pairs
     static async getSongPairs(req) {
         try {
-            // Find all songs 
             const songs = await Song.find({}).sort({ title: 1 });
             console.log("getSongPairs songs found:", songs.length);
 
-            // Fetch all playlists to calculate counts
-            const playlists = await Playlist.find({}, 'songs');
+            // Not sure if the playlist count is supposed to be unique, but if not, we can just remove duplicates from the list
+            const playlists = (await Playlist.find({}, 'songs')).map(p => {
+                p.songs = [...new Set(p.songs.map(id => id.toString()))];
+                return p;
+            });
+
             const songCountMap = {};
             playlists.forEach(list => {
                 list.songs.forEach(songId => {
@@ -324,7 +325,6 @@ class MongoDatabaseManagerStore {
                 year: body.year,
                 youTubeId: body.youTubeId,
                 created_by: user.email,
-                // playlists: [], // Removed
                 listens: 0,
                 duration: duration
             });
@@ -343,23 +343,18 @@ class MongoDatabaseManagerStore {
         const url = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=contentDetails&key=${API_KEY}`;
 
         try {
-            // 2. FETCH: Call the API
             const response = await fetch(url);
             const data = await response.json();
 
-            // 3. VALIDATE: Ensure video exists
             if (!data.items || data.items.length === 0) return "0:00";
 
-            // 4. PARSE: Extract duration (Format is usually PT#H#M#S, e.g., "PT4M13S")
             const isoDuration = data.items[0].contentDetails.duration;
             const match = isoDuration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
 
-            // Parse parts (parseInt ignores the letters H, M, S automatically)
             const hours = (parseInt(match[1]) || 0);
             const minutes = (parseInt(match[2]) || 0);
             const seconds = (parseInt(match[3]) || 0);
 
-            // 5. FORMAT: Convert to "MM:SS" or "H:MM:SS"
             let formattedDuration = "";
 
             if (hours > 0) {
@@ -371,7 +366,7 @@ class MongoDatabaseManagerStore {
 
             formattedDuration += seconds.toString().padStart(2, '0');
 
-            return formattedDuration; // Returns "3:46" or "1:05:20"
+            return formattedDuration;
 
         } catch (error) {
             console.error("Error fetching duration for videoId " + videoId + ":", error);

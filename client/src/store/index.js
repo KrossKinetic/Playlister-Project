@@ -543,21 +543,10 @@ function GlobalStoreContextProvider(props) {
 
     // MARK: Below are the functions not being used yet
     // ===========================================
-
-    store.addNewSong = () => {
-        let playlistSize = store.getPlaylistSize();
-        store.addCreateSongTransaction(
-            playlistSize, "Untitled", "?", new Date().getFullYear(), "dQw4w9WgXcQ");
+    store.addMoveSongTransaction = function (start, end) {
+        let transaction = new MoveSong_Transaction(store, start, end);
+        tps.processTransaction(transaction);
     }
-
-    // THIS FUNCTION CREATES A NEW SONG IN THE CURRENT LIST
-    store.createSong = function (index, song) {
-        let list = store.currentList;
-        list.songs.splice(index, 0, song);
-        store.updateCurrentList();
-    }
-
-    // THIS FUNCTION MOVES A SONG IN THE CURRENT LIST
     store.moveSong = function (start, end) {
         let list = store.currentList;
 
@@ -575,8 +564,19 @@ function GlobalStoreContextProvider(props) {
             }
             list.songs[end] = temp;
         }
+        store.updateCurrentList();
+    }
 
-        // NOW MAKE IT OFFICIAL
+    store.addNewSong = () => {
+        let playlistSize = store.getPlaylistSize();
+        store.addCreateSongTransaction(
+            playlistSize, "Untitled", "?", new Date().getFullYear(), "dQw4w9WgXcQ");
+    }
+
+    // THIS FUNCTION CREATES A NEW SONG IN THE CURRENT LIST
+    store.createSong = function (index, song) {
+        let list = store.currentList;
+        list.songs.splice(index, 0, song);
         store.updateCurrentList();
     }
 
@@ -590,11 +590,6 @@ function GlobalStoreContextProvider(props) {
             youTubeId: youTubeId
         };
         let transaction = new CreateSong_Transaction(store, index, song);
-        tps.processTransaction(transaction);
-    }
-
-    store.addMoveSongTransaction = function (start, end) {
-        let transaction = new MoveSong_Transaction(store, start, end);
         tps.processTransaction(transaction);
     }
 
