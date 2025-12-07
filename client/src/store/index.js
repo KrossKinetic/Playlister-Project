@@ -5,7 +5,7 @@ import storeRequestSender from './requests'
 import CreateSong_Transaction from '../transactions/CreateSong_Transaction'
 import MoveSong_Transaction from '../transactions/MoveSong_Transaction'
 import RemoveSong_Transaction from '../transactions/RemoveSong_Transaction'
-import UpdateSong_Transaction from '../transactions/UpdateSong_Transaction'
+import RenamePlaylist_Transaction from '../transactions/RenamePlaylist_Transaction'
 import AuthContext from '../auth'
 
 /*
@@ -486,13 +486,63 @@ function GlobalStoreContextProvider(props) {
     // ===========================================
     // TRANSACTION SYSTEM START
     // ===========================================
-
+    store.undo = function () {
+        tps.undoTransaction();
+    }
+    store.redo = function () {
+        tps.doTransaction();
+    }
+    store.canAddNewSong = function () {
+        return (store.currentList !== null);
+    }
+    store.canUndo = function () {
+        return ((store.currentList !== null) && tps.hasTransactionToUndo());
+    }
+    store.canRedo = function () {
+        return ((store.currentList !== null) && tps.hasTransactionToDo());
+    }
     store.setCurrentList = function (list) {
         storeReducer({
             type: GlobalStoreActionType.SET_CURRENT_LIST,
             payload: list
         });
+        if (list === null) {
+            tps.clearAllTransactions();
+        }
     }
+    store.updateCurrentList = async function () {
+        const response = await storeRequestSender.updatePlaylistById(store.currentList._id, store.currentList);
+        if (response.data.success) {
+            storeReducer({
+                type: GlobalStoreActionType.SET_CURRENT_LIST,
+                payload: store.currentList
+            });
+        }
+    }
+
+    store.removeSong = function (index) {
+        let list = store.currentList;
+        list.songs.splice(index, 1);
+        store.updateCurrentList();
+    }
+    store.addRemoveSongTransaction = (song, index) => {
+        let transaction = new RemoveSong_Transaction(store, index, song);
+        tps.processTransaction(transaction);
+    }
+
+
+    store.addRenamePlaylistTransaction = (oldName, newName) => {
+        let transaction = new RenamePlaylist_Transaction(store, oldName, newName);
+        tps.processTransaction(transaction);
+    }
+    store.renamePlaylist = function (name) {
+        let list = store.currentList;
+        list.name = name;
+        store.updateCurrentList();
+    }
+
+    // MARK: Below are the functions not being used yet
+    // ===========================================
 
     store.addNewSong = () => {
         let playlistSize = store.getPlaylistSize();
@@ -530,21 +580,6 @@ function GlobalStoreContextProvider(props) {
         store.updateCurrentList();
     }
 
-    // THIS FUNCTION REMOVES A SONG FROM THE CURRENT LIST
-    store.removeSong = function (index) {
-        let list = store.currentList;
-        list.songs.splice(index, 1);
-        store.updateCurrentList();
-    }
-
-    // THIS FUNCTION UPDATES A SONG IN THE CURRENT LIST
-    store.updateSong = function (index, songData) {
-        let list = store.currentList;
-        let song = list.songs[index];
-        Object.assign(song, songData);
-        store.updateCurrentList();
-    }
-
     // THIS FUNCDTION ADDS A CreateSong_Transaction TO THE TRANSACTION STACK
     store.addCreateSongTransaction = (index, title, artist, year, youTubeId) => {
         // ADD A SONG ITEM AND ITS NUMBER
@@ -563,50 +598,6 @@ function GlobalStoreContextProvider(props) {
         tps.processTransaction(transaction);
     }
 
-    // THIS FUNCTION ADDS A RemoveSong_Transaction TO THE TRANSACTION STACK
-    store.addRemoveSongTransaction = (song, index) => {
-        let transaction = new RemoveSong_Transaction(store, index, song);
-        tps.processTransaction(transaction);
-    }
-
-    store.addUpdateSongTransaction = function (index, newSongData) {
-        let song = store.currentList.songs[index];
-        let oldSongData = {
-            title: song.title,
-            artist: song.artist,
-            year: song.year,
-            youTubeId: song.youTubeId
-        };
-        let transaction = new UpdateSong_Transaction(this, index, oldSongData, newSongData);
-        tps.processTransaction(transaction);
-    }
-
-    store.updateCurrentList = async function () {
-        const response = await storeRequestSender.updatePlaylistById(store.currentList._id, store.currentList);
-        if (response.data.success) {
-            storeReducer({
-                type: GlobalStoreActionType.SET_CURRENT_LIST,
-                payload: store.currentList
-            });
-        }
-    }
-
-
-    store.undo = function () {
-        tps.undoTransaction();
-    }
-    store.redo = function () {
-        tps.doTransaction();
-    }
-    store.canAddNewSong = function () {
-        return (store.currentList !== null);
-    }
-    store.canUndo = function () {
-        return ((store.currentList !== null) && tps.hasTransactionToUndo());
-    }
-    store.canRedo = function () {
-        return ((store.currentList !== null) && tps.hasTransactionToDo());
-    }
     store.canClose = function () {
         return (store.currentList !== null);
     }

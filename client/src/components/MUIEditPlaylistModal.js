@@ -5,6 +5,8 @@ import Modal from '@mui/material/Modal';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
+import TextField from '@mui/material/TextField';
+
 
 const style = {
     position: 'absolute',
@@ -73,7 +75,28 @@ const songItemStyle = {
 
 export default function MUIEditPlaylistModal({ open, handleClose, playlist }) {
     const { store } = useContext(GlobalStoreContext);
+    const [text, setText] = useState("");
+    const [isEditing, setIsEditing] = useState(false);
+
     if (!playlist) return null;
+
+    function handleDoubleClick() {
+        setText(playlist.name);
+        setIsEditing(true);
+    }
+
+    function handleKeyPress(event) {
+        if (event.code === "Enter") {
+            handleBlur();
+        }
+    }
+
+    function handleBlur() {
+        setIsEditing(false);
+        if (text !== playlist.name && text !== "") {
+            store.addRenamePlaylistTransaction(playlist.name, text);
+        }
+    }
 
     return (
         <Modal
@@ -100,9 +123,29 @@ export default function MUIEditPlaylistModal({ open, handleClose, playlist }) {
                                     sx={{ width: 48, height: 48, mr: 2, border: '2px solid white', boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}
                                 />
                                 <Box>
-                                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#333' }}>
-                                        {playlist.name}
-                                    </Typography>
+                                    {isEditing ? (
+                                        <TextField
+                                            size="small"
+                                            value={text}
+                                            onChange={(event) => setText(event.target.value)}
+                                            onKeyDown={handleKeyPress}
+                                            onBlur={handleBlur}
+                                            autoFocus
+                                            variant="standard"
+                                            InputProps={{
+                                                disableUnderline: false,
+                                                style: { fontSize: '1.2rem', fontWeight: 'bold', color: '#333' }
+                                            }}
+                                        />
+                                    ) : (
+                                        <Typography
+                                            variant="subtitle1"
+                                            onDoubleClick={handleDoubleClick}
+                                            sx={{ fontWeight: 'bold', color: '#333', cursor: 'pointer' }}
+                                        >
+                                            {playlist.name}
+                                        </Typography>
+                                    )}
                                     <Typography variant="caption" color="text.secondary">
                                         {playlist.songs.length} Songs
                                     </Typography>
@@ -187,6 +230,7 @@ export default function MUIEditPlaylistModal({ open, handleClose, playlist }) {
                                             </Button>
                                             <Button
                                                 variant="contained"
+                                                onClick={() => store.addRemoveSongTransaction(song, index)}
                                                 sx={{
                                                     bgcolor: '#6a5acd',
                                                     color: 'white',
