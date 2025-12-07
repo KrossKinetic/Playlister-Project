@@ -30,7 +30,7 @@ const style = {
 };
 
 const headerStyle = {
-    bgcolor: '#2E7D32',
+    bgcolor: '#6a5acd',
     color: 'white',
     p: 2,
     pl: 3,
@@ -227,16 +227,16 @@ export default function MUIPlayPlaylistModal({ open, handleClose, playlist }) {
                             </Typography>
 
                             <Box sx={controlsStyle}>
-                                <IconButton onClick={handleSkipPrevious} sx={{ color: '#555', '&:hover': { color: '#2E7D32', bgcolor: '#e8f5e9' } }}>
+                                <IconButton onClick={handleSkipPrevious} sx={{ color: '#555', '&:hover': { color: '#6a5acd', bgcolor: '#e8f5e9' } }}>
                                     <SkipPreviousIcon sx={{ fontSize: 32 }} />
                                 </IconButton>
                                 <IconButton
                                     onClick={handlePlayPause}
                                     sx={{
                                         color: 'white',
-                                        bgcolor: '#2E7D32',
+                                        bgcolor: '#6a5acd',
                                         p: 1.5,
-                                        '&:hover': { bgcolor: '#1B5E20' },
+                                        '&:hover': { bgcolor: '#483d8b' },
                                         boxShadow: '0 2px 8px rgba(46, 125, 50, 0.4)'
                                     }}
                                 >
@@ -245,7 +245,7 @@ export default function MUIPlayPlaylistModal({ open, handleClose, playlist }) {
                                         <PlayArrowIcon sx={{ fontSize: 36 }} />
                                     }
                                 </IconButton>
-                                <IconButton onClick={handleSkipNext} sx={{ color: '#555', '&:hover': { color: '#2E7D32', bgcolor: '#e8f5e9' } }}>
+                                <IconButton onClick={handleSkipNext} sx={{ color: '#555', '&:hover': { color: '#6a5acd', bgcolor: '#e8f5e9' } }}>
                                     <SkipNextIcon sx={{ fontSize: 32 }} />
                                 </IconButton>
                             </Box>

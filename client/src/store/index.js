@@ -467,12 +467,32 @@ function GlobalStoreContextProvider(props) {
         }
     }
 
+    store.updatePlaylist = async function (id, playlist) {
+        const response = await storeRequestSender.updatePlaylistById(id, playlist);
+        if (response.data.success) {
+            const playlists = await store.loadPlaylists()
+            storeReducer({
+                type: GlobalStoreActionType.LOAD_PLAYLIST,
+                payload: playlists
+            });
+            return "success";
+        } else {
+            return response.data.errorMessage;
+        }
+    }
 
 
     // MARK: - Transaction System
     // ===========================================
     // TRANSACTION SYSTEM START
     // ===========================================
+
+    store.setCurrentList = function (list) {
+        storeReducer({
+            type: GlobalStoreActionType.SET_CURRENT_LIST,
+            payload: list
+        });
+    }
 
     store.addNewSong = () => {
         let playlistSize = store.getPlaylistSize();
@@ -571,19 +591,6 @@ function GlobalStoreContextProvider(props) {
         }
     }
 
-    store.updatePlaylist = async function (id, playlist) {
-        const response = await storeRequestSender.updatePlaylistById(id, playlist);
-        if (response.data.success) {
-            const playlists = await store.loadPlaylists()
-            storeReducer({
-                type: GlobalStoreActionType.LOAD_PLAYLIST,
-                payload: playlists
-            });
-            return "success";
-        } else {
-            return response.data.errorMessage;
-        }
-    }
 
     store.undo = function () {
         tps.undoTransaction();

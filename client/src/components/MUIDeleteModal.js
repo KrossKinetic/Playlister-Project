@@ -18,7 +18,7 @@ const style = {
 };
 
 const headerStyle = {
-    bgcolor: '#2E7D32',
+    bgcolor: '#6a5acd',
     color: 'white',
     p: 3,
     textAlign: 'center',
@@ -37,7 +37,7 @@ const bodyStyle = {
 };
 
 const buttonStyle = {
-    bgcolor: '#2E7D32',
+    bgcolor: '#6a5acd',
     color: 'white',
     fontWeight: 'bold',
     borderRadius: '8px',
@@ -46,7 +46,7 @@ const buttonStyle = {
     fontSize: '1rem',
     boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
     '&:hover': {
-        bgcolor: '#1B5E20',
+        bgcolor: '#483d8b',
     },
     width: '140px',
     mx: 2

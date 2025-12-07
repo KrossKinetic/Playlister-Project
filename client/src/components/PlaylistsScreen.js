@@ -127,10 +127,12 @@ function PlaylistsScreen() {
     };
 
     const handleEditPlaylist = (playlist) => {
+        store.setCurrentList(playlist);
         setEditingPlaylist(playlist);
     };
 
     const handleCloseEditModal = () => {
+        store.setCurrentList(null);
         setEditingPlaylist(null);
     };
 

@@ -23,7 +23,7 @@ const style = {
 };
 
 const headerStyle = {
-    bgcolor: '#2E7D32', // Darker green for header
+    bgcolor: '#6a5acd', // Darker green for header
     color: 'white',
     p: 3,
     textAlign: 'center',
@@ -48,22 +48,22 @@ const inputStyle = {
             borderColor: '#ccc',
         },
         '&:hover fieldset': {
-            borderColor: '#2E7D32',
+            borderColor: '#6a5acd',
         },
         '&.Mui-focused fieldset': {
-            borderColor: '#2E7D32',
+            borderColor: '#6a5acd',
         },
     },
     '& .MuiInputLabel-root': {
         color: '#555',
         '&.Mui-focused': {
-            color: '#2E7D32',
+            color: '#6a5acd',
         },
     }
 };
 
 const buttonStyle = {
-    bgcolor: '#2E7D32',
+    bgcolor: '#6a5acd',
     color: 'white',
     fontWeight: 'bold',
     borderRadius: '8px',
@@ -72,7 +72,7 @@ const buttonStyle = {
     fontSize: '1rem',
     boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
     '&:hover': {
-        bgcolor: '#1B5E20',
+        bgcolor: '#483d8b',
     },
     width: '140px'
 };
@@ -185,7 +185,7 @@ export default function MUICreateSongModal({ handleConfirmCreate, handleCancelCr
                                 opacity: isCompleteDisabled ? 0.5 : 1,
                                 cursor: isCompleteDisabled ? 'not-allowed' : 'pointer',
                                 '&:hover': {
-                                    bgcolor: isCompleteDisabled ? '#2E7D32' : '#1B5E20',
+                                    bgcolor: isCompleteDisabled ? '#6a5acd' : '#483d8b',
                                 }
                             }}
                             onClick={() => handleConfirmCreate(title, artist, year, youTubeId)}

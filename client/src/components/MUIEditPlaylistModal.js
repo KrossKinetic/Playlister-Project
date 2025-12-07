@@ -24,7 +24,7 @@ const style = {
 };
 
 const headerStyle = {
-    bgcolor: '#2E7D32',
+    bgcolor: '#6a5acd',
     color: 'white',
     p: 2,
     pl: 3,
@@ -114,10 +114,10 @@ export default function MUIEditPlaylistModal({ open, handleClose, playlist }) {
                                     onClick={store.addNewSong}
                                     variant="contained"
                                     sx={{
-                                        bgcolor: '#2E7D32',
+                                        bgcolor: '#6a5acd',
                                         color: 'white',
                                         textTransform: 'none',
-                                        '&:hover': { bgcolor: '#1B5E20' }
+                                        '&:hover': { bgcolor: '#483d8b' }
                                     }}
                                 >
                                     + Add Song
@@ -127,10 +127,10 @@ export default function MUIEditPlaylistModal({ open, handleClose, playlist }) {
                                     onClick={store.undo}
                                     variant="contained"
                                     sx={{
-                                        bgcolor: '#2E7D32',
+                                        bgcolor: '#6a5acd',
                                         color: 'white',
                                         textTransform: 'none',
-                                        '&:hover': { bgcolor: '#1B5E20' }
+                                        '&:hover': { bgcolor: '#483d8b' }
                                     }}
                                 >
                                     Undo
@@ -140,10 +140,10 @@ export default function MUIEditPlaylistModal({ open, handleClose, playlist }) {
                                     onClick={store.redo}
                                     variant="contained"
                                     sx={{
-                                        bgcolor: '#2E7D32',
+                                        bgcolor: '#6a5acd',
                                         color: 'white',
                                         textTransform: 'none',
-                                        '&:hover': { bgcolor: '#1B5E20' }
+                                        '&:hover': { bgcolor: '#483d8b' }
                                     }}
                                 >
                                     Redo
@@ -152,10 +152,10 @@ export default function MUIEditPlaylistModal({ open, handleClose, playlist }) {
                                     onClick={handleClose}
                                     variant="contained"
                                     sx={{
-                                        bgcolor: '#2E7D32',
+                                        bgcolor: '#6a5acd',
                                         color: 'white',
                                         textTransform: 'none',
-                                        '&:hover': { bgcolor: '#1B5E20' }
+                                        '&:hover': { bgcolor: '#483d8b' }
                                     }}
                                 >
                                     Close
@@ -176,10 +176,10 @@ export default function MUIEditPlaylistModal({ open, handleClose, playlist }) {
                                             <Button
                                                 variant="contained"
                                                 sx={{
-                                                    bgcolor: '#2E7D32',
+                                                    bgcolor: '#6a5acd',
                                                     color: 'white',
                                                     textTransform: 'none',
-                                                    '&:hover': { bgcolor: '#1B5E20' },
+                                                    '&:hover': { bgcolor: '#483d8b' },
                                                     mr: 1
                                                 }}
                                             >
@@ -188,10 +188,10 @@ export default function MUIEditPlaylistModal({ open, handleClose, playlist }) {
                                             <Button
                                                 variant="contained"
                                                 sx={{
-                                                    bgcolor: '#2E7D32',
+                                                    bgcolor: '#6a5acd',
                                                     color: 'white',
                                                     textTransform: 'none',
-                                                    '&:hover': { bgcolor: '#1B5E20' }
+                                                    '&:hover': { bgcolor: '#483d8b' }
                                                 }}
                                             >
                                                 Remove
