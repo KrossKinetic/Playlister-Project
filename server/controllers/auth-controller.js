@@ -255,11 +255,33 @@ registerUser = async (req, res) => {
     }
 }
 
+checkEmailExists = async (req, res) => {
+    console.log("checkEmailExists");
+    try {
+        const { email } = req.params;
+        if (!email) {
+            return res.status(400).json({ errorMessage: "Email is required." });
+        }
+
+        const emailLower = email.toLowerCase();
+        const existingUser = await DatabaseManager.findOneUser({ email: emailLower });
+
+        return res.status(200).json({
+            exists: !!existingUser
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send();
+    }
+}
+
 module.exports = {
     getLoggedIn,
     registerUser,
     loginUser,
     loginGuest,
     logoutUser,
-    updateUser
+    updateUser,
+    checkEmailExists
 }

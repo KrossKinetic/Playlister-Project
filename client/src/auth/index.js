@@ -298,6 +298,14 @@ function AuthContextProvider(props) {
         return "";
     }
 
+    auth.checkEmailExists = async function (email) {
+        const response = await authRequestSender.checkEmailExists(email);
+        if (response.status === 200) {
+            return response.data.exists;
+        }
+        return false;
+    }
+
     return (
         <AuthContext.Provider value={{
             auth

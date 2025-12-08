@@ -27,6 +27,7 @@ export default function RegisterScreen() {
         password: "",
         passwordVerify: ""
     });
+    const [isEmailTaken, setIsEmailTaken] = useState(false);
     const fileInputRef = useRef(null);
 
     const getImageDimensions = (file) => {
@@ -69,12 +70,20 @@ export default function RegisterScreen() {
         }
     };
 
-    const handleInputChange = (event) => {
+    const handleInputChange = async (event) => {
         const { name, value } = event.target;
         setFormData({
             ...formData,
             [name]: value
         });
+        if (name === "email") {
+            if (value) {
+                const exists = await auth.checkEmailExists(value);
+                setIsEmailTaken(exists);
+            } else {
+                setIsEmailTaken(false);
+            }
+        }
     }
 
     const handleSubmit = (event) => {
@@ -95,9 +104,9 @@ export default function RegisterScreen() {
 
     const isUsernameValid = (formData.username.trim() !== "" || formData.username === "");
 
-    const isEmailValid = ((formData.email.includes("@") && formData.email.includes(".")) || formData.email === "");
+    const isEmailValid = ((formData.email.includes("@") && formData.email.includes(".")) || formData.email === "") && !isEmailTaken;
 
-    const isFormValid = formData.username && formData.email && formData.password && formData.passwordVerify && isImageValid && !image.isDefault && isPasswordMatch && isPasswordValid;
+    const isFormValid = formData.username && formData.email && formData.password && formData.passwordVerify && isImageValid && !image.isDefault && isPasswordMatch && isPasswordValid && !isEmailTaken;
 
     return (
         <Container component="main" maxWidth="xs">
@@ -174,7 +183,7 @@ export default function RegisterScreen() {
                                 value={formData.email}
                                 onChange={handleInputChange}
                                 error={!isEmailValid}
-                                helperText={!isEmailValid ? "Please enter a valid email address" : ""}
+                                helperText={!isEmailValid ? (isEmailTaken ? "Email already in use" : "Please enter a valid email address") : ""}
                             />
                         </Grid>
                         <Grid item xs={12}>

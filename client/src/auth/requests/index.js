@@ -131,13 +131,27 @@ export async function updateUser(email, username, avatarPng, password, passwordV
     return { data: data, status: res.status, statusText: res.statusText };
 }
 
+export async function checkEmailExists(email) {
+    const res = await api(`/check-email/${email}`, {
+        method: 'GET'
+    });
+
+    let data = { exists: false };
+    try {
+        data = await res.json();
+    } catch (err) { }
+
+    return { data: data, status: res.status, statusText: res.statusText };
+}
+
 const apis = {
     getLoggedIn,
     registerUser,
     loginUser,
     loginGuest,
     logoutUser,
-    updateUser
+    updateUser,
+    checkEmailExists
 }
 
 export default apis
