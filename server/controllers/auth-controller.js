@@ -61,7 +61,9 @@ loginUser = async (req, res) => {
                 .json({ errorMessage: "Please enter all required fields." });
         }
 
-        const existingUser = await DatabaseManager.findOneUser({ email: email });
+        const emailLower = email.toLowerCase();
+
+        const existingUser = await DatabaseManager.findOneUser({ email: emailLower });
 
         console.log("existingUser: " + existingUser);
         if (!existingUser) {
@@ -198,6 +200,7 @@ registerUser = async (req, res) => {
                 .status(400)
                 .json({ errorMessage: "Please enter all required fields." });
         }
+        const emailLower = email.toLowerCase();
         console.log("all fields provided");
         if (password.length < 8) {
             return res
@@ -216,7 +219,7 @@ registerUser = async (req, res) => {
         }
         console.log("password and password verify match");
 
-        const existingUser = await DatabaseManager.findOneUser({ email: email });
+        const existingUser = await DatabaseManager.findOneUser({ email: emailLower });
 
         console.log("existingUser: " + existingUser);
         if (existingUser) {
@@ -233,7 +236,7 @@ registerUser = async (req, res) => {
         const passwordHash = await bcrypt.hash(password, salt);
         console.log("passwordHash: " + passwordHash);
 
-        const savedUser = await DatabaseManager.createUser(username, email, passwordHash, avatarPng);
+        const savedUser = await DatabaseManager.createUser(username, emailLower, passwordHash, avatarPng);
 
         console.log("new user saved: " + savedUser._id);
 

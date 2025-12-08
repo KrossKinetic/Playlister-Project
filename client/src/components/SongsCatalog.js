@@ -216,7 +216,12 @@ function SongsCatalog() {
     const isMenuOpenAdd = Boolean(anchorElAdd);
 
     const handleMenuOpenAdd = (event) => {
-        setAnchorElAdd(event.currentTarget);
+        if (store.songCatalogSource === "Modal") {
+            handleAddSongToPlaylist(store.currentList, currentSong);
+            handleMenuClose();
+        } else {
+            setAnchorElAdd(event.currentTarget);
+        }
     };
 
     const handleMenuCloseAdd = () => {
