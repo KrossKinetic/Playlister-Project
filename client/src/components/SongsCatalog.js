@@ -33,7 +33,7 @@ function SongsCatalog() {
     const [isSongPlaying, setIsSongPlaying] = useState(false);
     const [currentSongForPlaying, setCurrentSongForPlaying] = useState(0);
     const [anchorEl, setAnchorEl] = useState(null);
-    const [maintainFilterSort, setMaintainFilterSort] = useState(false);
+
     const [isUserFilterActive, setIsUserFilterActive] = useState(false);
     const isMenuOpen = Boolean(anchorEl);
     const [errorToastState, setErrorToastState] = useState({
@@ -79,37 +79,38 @@ function SongsCatalog() {
     }, [auth]);
 
     useEffect(() => {
-        if (!maintainFilterSort) {
-            let songs = store.songCatalog;
-            if (auth.loggedIn && auth.guestLoggedIn === false) {
-                songs = store.songCatalog.filter(s => (s.created_by === auth.user.email));
-                setIsUserFilterActive(true);
-            } else {
-                setIsUserFilterActive(false);
-            }
-
-            const comparator = getComparator(sortType);
-            if (comparator) {
-                songs = [...songs].sort(comparator);
-            }
-            setFilteredSongs(songs);
+        console.log("store.songCatalog changed");
+        const hasSearch = searchTitle || searchArtist || searchYear;
+        if (hasSearch) {
+            handleSearch();
         } else {
-            setMaintainFilterSort(false);
-            if (isUserFilterActive) {
-                let tempFilter = store.songCatalog.filter(s => (s.created_by === auth.user.email));
-                const comparator = getComparator(sortType);
-                if (comparator && tempFilter) {
-                    const sorted = [...tempFilter].sort(comparator);
-                    setFilteredSongs(sorted);
+            let songs = store.songCatalog;
+            let shouldBeUserFilter = isUserFilterActive;
+
+            if (auth.loggedIn && auth.guestLoggedIn === false) {
+                if (!hasInitialSorted.current) {
+                    shouldBeUserFilter = true;
+                    songs = store.songCatalog.filter(s => (s.created_by === auth.user.email));
+                    const comparator = getComparator("listens-hi-lo");
+                    songs.sort(comparator);
+                    hasInitialSorted.current = true;
+                } else if (isUserFilterActive) {
+                    songs = store.songCatalog.filter(s => (s.created_by === auth.user.email));
+                } else {
+                    songs = [...store.songCatalog];
                 }
             } else {
-                setFilteredSongs(store.songCatalog);
-                handleSearch();
+                songs = [...store.songCatalog];
+                shouldBeUserFilter = false;
             }
-        }
-        if (store.songCatalog && (store.songCatalog.length > 0) && (!hasInitialSorted.current)) {
-            handleSort("listens-hi-lo");
-            hasInitialSorted.current = true;
+
+            if (songs) {
+                const comparator = getComparator(sortType);
+                songs.sort(comparator);
+            }
+
+            setFilteredSongs(songs);
+            setIsUserFilterActive(shouldBeUserFilter);
         }
     }, [store.songCatalog]);
 
@@ -143,7 +144,6 @@ function SongsCatalog() {
     const handleSongClick = (song) => {
         if (currentSongForPlaying !== song._id) {
             setIsSongPlaying(false);
-            setMaintainFilterSort(true);
             store.updateSongListens(song._id);
             setCurrentSongForPlaying(song._id);
             setTimeout(() => {
@@ -217,7 +217,6 @@ function SongsCatalog() {
 
     const handleMenuOpenAdd = (event) => {
         setAnchorElAdd(event.currentTarget);
-        setMaintainFilterSort(true);
     };
 
     const handleMenuCloseAdd = () => {
@@ -261,13 +260,11 @@ function SongsCatalog() {
                 });
             store.updatePlaylistLastAccessed(playlist._id);
             response = "success";
-            store.loadSongCatalog();
         }
 
         console.log("playlist after", playlist.songs);
 
         if (response === "success") {
-            store.loadSongCatalog();
             handleMenuCloseAdd();
         } else {
             setErrorToastState({
@@ -289,7 +286,6 @@ function SongsCatalog() {
 
     const handleConfirmRemoveSong = () => {
         store.deleteSong(currentSong._id);
-        setMaintainFilterSort(true);
         setIsRemoveSongModalOpen(false);
     };
 
@@ -309,7 +305,6 @@ function SongsCatalog() {
         } else {
             setEditSongModalError(result);
         }
-        setMaintainFilterSort(true);
     };
 
     const handleCancelEditSong = () => {
@@ -328,7 +323,6 @@ function SongsCatalog() {
         } else {
             setCreateSongModalError(result.errorMessage);
         }
-        setMaintainFilterSort(true);
     };
 
     const handleCancelCreateSong = () => {
@@ -360,6 +354,7 @@ function SongsCatalog() {
                         autoFocus
                         value={searchTitle}
                         onChange={(e) => setSearchTitle(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
                         variant="filled"
                         InputProps={{
                             disableUnderline: true,
@@ -382,6 +377,7 @@ function SongsCatalog() {
                         autoComplete="off"
                         value={searchArtist}
                         onChange={(e) => setSearchArtist(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
                         variant="filled"
                         InputProps={{
                             disableUnderline: true,
@@ -404,6 +400,7 @@ function SongsCatalog() {
                         autoComplete="off"
                         value={searchYear}
                         onChange={(e) => setSearchYear(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
                         variant="filled"
                         InputProps={{
                             disableUnderline: true,

@@ -227,6 +227,7 @@ function PlaylistsScreen() {
             autoComplete="off"
             value={value}
             onChange={(e) => setter(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
             variant="filled"
             InputProps={{
                 disableUnderline: true,

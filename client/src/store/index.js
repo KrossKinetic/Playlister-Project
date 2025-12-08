@@ -276,8 +276,9 @@ function GlobalStoreContextProvider(props) {
     store.updatePlaylist = async function (id, playlist) {
         let response = await storeRequestSender.updatePlaylistById(id, playlist);
         if (response.data.success) {
-            await store.loadPlaylists();
-            store.loadSongCatalog();
+            const p1 = store.loadPlaylists();
+            const p2 = store.loadSongCatalog();
+            await Promise.all([p1, p2]);
 
             if (store.currentList && store.currentList._id === id) {
                 store.setCurrentList(playlist);
