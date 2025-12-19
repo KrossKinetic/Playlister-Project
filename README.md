@@ -33,7 +33,7 @@ A full-stack web application for managing music playlists, allowing users to cre
     ```bash
     npm install
     ```
-3.  Create a `.env` file in the `server` directory and add your database and JWT secrets (e.g., `DB_CONNECT`, `JWT_SECRET`).
+3.  Create a `.env` file in the `server` directory and add your database, youtube API and JWT secrets (e.g., `DB_CONNECT`, `JWT_SECRET`).
 4.  Start the server:
     ```bash
     node index.js
